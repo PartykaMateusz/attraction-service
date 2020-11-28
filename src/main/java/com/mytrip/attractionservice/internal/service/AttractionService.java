@@ -1,7 +1,6 @@
 package com.mytrip.attractionservice.internal.service;
 
 import com.mytrip.attractionservice.internal.model.Attraction;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -9,5 +8,5 @@ public interface AttractionService {
 
     List<Attraction> getAttractionsByCityId(Long cityId);
 
-  //  Attraction getAttractionsByAttractionId(Long attractionId);
+    Attraction getAttractionsByAttractionId(Long attractionId);
 }
