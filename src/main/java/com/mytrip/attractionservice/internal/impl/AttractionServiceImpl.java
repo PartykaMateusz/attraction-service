@@ -3,6 +3,7 @@ package com.mytrip.attractionservice.internal.impl;
 import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
+import com.mytrip.attractionservice.api.exception.AttractionsInCityNotFound;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.model.Attraction;
 import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
@@ -39,9 +40,8 @@ public class AttractionServiceImpl implements AttractionService {
         LOGGER.info("searching attractions in city "+cityId);
 
         try {
-            //TODO add optional
-            ResponseEntity<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
-            List<Attraction> attractions = attractionsResponse.getBody().getData();
+            Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
+            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId)).getData();
             LOGGER.info("returned {} attractions in {} city", attractions.size(), cityId);
             return attractions;
         }
@@ -55,15 +55,13 @@ public class AttractionServiceImpl implements AttractionService {
         return null;
     }
 
-
-
     @Override
     public Attraction getAttractionsByAttractionId(Long attractionId) {
         LOGGER.info("searching attractions by ID:  "+attractionId);
 
         try {
-            ResponseEntity<Optional<Attraction>> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
-            Attraction attraction = attractionsResponse.getBody().orElseThrow(() -> new AttractionNotFoundException(attractionId));
+            Optional<Attraction> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
+            Attraction attraction = attractionsResponse.orElseThrow(() -> new AttractionNotFoundException(attractionId));
             if (attraction.getLocation_id() == null) {
                 //TODO make cool exception resolver
                 LOGGER.warn("Attraction not found. attractionId: {}", attractionId);

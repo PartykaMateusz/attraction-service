@@ -9,4 +9,6 @@ public interface AttractionService {
     List<Attraction> getAttractionsByCityId(Long cityId);
 
     Attraction getAttractionsByAttractionId(Long attractionId);
+
+    List<Attraction> getAttractionsByAttractionName(String attractionName);
 }

@@ -25,12 +25,14 @@ public interface AttractionFeignClient {
     @RequestMapping(value = "/attractions/list",
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
-    ResponseEntity<RestOkAttractionsResponse> getAttractionsByCityId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
+    Optional<RestOkAttractionsResponse> getAttractionsByCityId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
                                                                      @RequestParam(name = "location_id") String locationId);
 
     @RequestMapping(value = "/attractions/get-details",
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
-    ResponseEntity<Optional<Attraction>> getAttractionsByAttractionId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
+    Optional<Attraction> getAttractionsByAttractionId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
                                                                       @RequestParam(name = "location_id") String attractionId);
+
+
 }
