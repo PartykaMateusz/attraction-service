@@ -2,6 +2,8 @@ package com.mytrip.attractionservice.internal.impl;
 
 import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.AttractionException;
+import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
+import com.mytrip.attractionservice.api.exception.AttractionsInCityNotFound;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.model.Attraction;
 import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -37,8 +40,8 @@ public class AttractionServiceImpl implements AttractionService {
         LOGGER.info("searching attractions in city "+cityId);
 
         try {
-            ResponseEntity<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
-            List<Attraction> attractions = attractionsResponse.getBody().getData();
+            Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
+            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId)).getData();
             LOGGER.info("returned {} attractions in {} city", attractions.size(), cityId);
             return attractions;
         }
@@ -52,33 +55,31 @@ public class AttractionServiceImpl implements AttractionService {
         return null;
     }
 
+    @Override
+    public Attraction getAttractionsByAttractionId(Long attractionId) {
+        LOGGER.info("searching attractions by ID:  "+attractionId);
 
+        try {
+            Optional<Attraction> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
+            Attraction attraction = attractionsResponse.orElseThrow(() -> new AttractionNotFoundException(attractionId));
+            if (attraction.getLocation_id() == null) {
+                //TODO make cool exception resolver
+                LOGGER.warn("Attraction not found. attractionId: {}", attractionId);
+                throw new AttractionNotFoundException(attractionId);
+            }
+            LOGGER.info("successfully returned attraction. name: {}, id: {}", attraction.getName(), attractionId);
+            return attraction;
+        }
+        catch (FeignException e) {
+            if (e.status() == HttpStatus.NOT_FOUND.value()) {
+                handleNotFoundResponse(attractionId);
+            }
 
-//    @Override
-//    public Attraction getAttractionsByAttractionId(Long attractionId) {
-//        LOGGER.info("searching attractions by ID:  "+attractionId);
-//
-//        try {
-//            ResponseEntity<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
-//            Attraction attraction = attractionsResponse.getBody().getData().get(0);
-//            LOGGER.info("returned {} attractions in {} city", attraction.size(), attractionId);
-//            return attraction;
-//        }
-//        catch (FeignException e) {
-//            if (e.status() == HttpStatus.NOT_FOUND.value()) {
-//                handleNotFoundResponse(cityId);
-//            }
-//
-//            if (e.status() >= 500 && e.status() <= 599) {
-//                LOGGER.error(ATTRACTIONS_SERVICE_5XX_ERROR, "Attractions service 5xx error. status code : {0}", e.status());
-//            } else {
-//                LOGGER.error(ATTRACTIONS_SERVICE_5XX_ERROR, "Attractions service error for city: {0} " +
-//                        "status code: {1} ", cityId, e.status());
-//            }
-//
-//            throw e;
-//        }
-//    }
+            LOGGER.error(ATTRACTIONS_SERVICE_5XX_ERROR, "Attractions service 5xx error. status code : {0}", e.status());
+
+            throw e;
+        }
+    }
 
     private void handleNotFoundResponse(Long cityId) {
         LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Attractions number not found for city {0}", cityId);

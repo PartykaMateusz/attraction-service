@@ -25,9 +25,9 @@ public class AttractionController {
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 
-//    @GetMapping("/{attractionId}")
-//    public ResponseEntity<?> getAttractionById(@PathVariable Long attractionId){
-//        Attraction attractions = attractionService.getAttractionsByAttractionId(attractionId);
-//        return new ResponseEntity<>(attractions, HttpStatus.OK);
-//    }
+    @GetMapping("/{attractionId}")
+    public ResponseEntity<?> getAttractionById(@PathVariable Long attractionId){
+        Attraction attractions = attractionService.getAttractionsByAttractionId(attractionId);
+        return new ResponseEntity<>(attractions, HttpStatus.OK);
+    }
 }
