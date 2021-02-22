@@ -1,12 +1,8 @@
 package com.mytrip.attractionservice.internal.impl;
 
-import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
-import com.mytrip.attractionservice.api.exception.AttractionException;
-import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
-import com.mytrip.attractionservice.api.exception.AttractionsInCityNotFound;
+import com.mytrip.attractionservice.api.exception.*;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.model.Attraction;
-import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.model.*;
 import com.mytrip.attractionservice.internal.service.AttractionService;
 
 import feign.FeignException;
@@ -20,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -81,6 +78,28 @@ public class AttractionServiceImpl implements AttractionService {
         }
     }
 
+    @Override
+    public List<Attraction> getAttractionsByAttractionName(String attractionName) {
+
+        LOGGER.info("searching attractions by name "+attractionName);
+
+        try {
+            //TODO create ne model
+            Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getLocationByName(KEY, attractionName);
+            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new AttractionNotFound(attractionName)).getData();
+            LOGGER.info("returned {} attractions", attractions.size());
+            return attractions;
+        }
+        catch (FeignException e) {
+            if (e.status() == HttpStatus.NOT_FOUND.value()) {
+                this.handleNotFoundResponse(attractionName);
+            }
+            LOGGER.error(ATTRACTIONS_SERVICE_5XX_ERROR, "Attractions service 5xx error. status code : {0}", e.status());
+        }
+        this.handleUnexpectedResponse();
+        return null;
+    }
+
     private void handleNotFoundResponse(Long cityId) {
         LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Attractions number not found for city {0}", cityId);
         throw new AttractionClientPackageNotFoundException(cityId);
@@ -89,5 +108,10 @@ public class AttractionServiceImpl implements AttractionService {
     private void handleUnexpectedResponse() {
         LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Unexpected error");
         throw new AttractionException();
+    }
+
+    private void handleNotFoundResponse(String attractionName) {
+        LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Attractions {0} not found }", attractionName);
+        throw new AttractionClientPackageNotFoundException(attractionName);
     }
 }

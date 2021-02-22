@@ -12,6 +12,14 @@ public class AttractionClientPackageNotFoundException extends RuntimeException {
         super(buildErrorMessage(cityId));
     }
 
+    public AttractionClientPackageNotFoundException(final String attractionName) {
+        super(buildErrorMessage(attractionName));
+    }
+
+    private static String buildErrorMessage(final String attractionName) {
+        return MessageFormat.format("Unable to find package for attraction: {0}", attractionName);
+    }
+
     private static String buildErrorMessage(final Long cityId) {
         return MessageFormat.format("Unable to find package for city: {0}", cityId);
     }

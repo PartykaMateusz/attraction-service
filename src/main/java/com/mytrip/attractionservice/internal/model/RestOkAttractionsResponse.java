@@ -22,7 +22,4 @@ public class RestOkAttractionsResponse {
         return this;
     }
 
-    public List<Attraction> getData() {
-        return data;
-    }
 }
