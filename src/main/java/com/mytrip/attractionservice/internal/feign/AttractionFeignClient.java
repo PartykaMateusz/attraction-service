@@ -1,14 +1,10 @@
 package com.mytrip.attractionservice.internal.feign;
 
 import com.mytrip.attractionservice.internal.configuration.AttractionClientConfiguration;
-import com.mytrip.attractionservice.internal.model.Attraction;
-import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.model.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -26,13 +22,19 @@ public interface AttractionFeignClient {
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
     Optional<RestOkAttractionsResponse> getAttractionsByCityId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
-                                                                     @RequestParam(name = "location_id") String locationId);
+                                                               @RequestParam(name = "location_id") String locationId);
 
     @RequestMapping(value = "/attractions/get-details",
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
     Optional<Attraction> getAttractionsByAttractionId(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
-                                                                      @RequestParam(name = "location_id") String attractionId);
+                                                      @RequestParam(name = "location_id") String attractionId);
+
+    @RequestMapping(value = "/locations/auto-complete",
+            produces = APPLICATION_JSON,
+            method = RequestMethod.GET)
+    Optional<RestOkAutoCompleteResponse> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
+                                                          @RequestParam(name = "query") String query);
 
 
 }

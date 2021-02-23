@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/attraction")
@@ -28,6 +29,12 @@ public class AttractionController {
     @GetMapping("/{attractionId}")
     public ResponseEntity<?> getAttractionById(@PathVariable Long attractionId){
         Attraction attractions = attractionService.getAttractionsByAttractionId(attractionId);
+        return new ResponseEntity<>(attractions, HttpStatus.OK);
+    }
+
+    @GetMapping("/search/{attractionName}")
+    public ResponseEntity<?> getAttractionByName(@PathVariable String attractionName){
+        Set<Attraction> attractions = attractionService.getAttractionsByAttractionName(attractionName);
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 }
