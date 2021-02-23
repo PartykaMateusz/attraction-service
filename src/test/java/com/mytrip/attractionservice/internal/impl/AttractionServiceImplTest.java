@@ -5,7 +5,9 @@ import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.model.Attraction;
+import com.mytrip.attractionservice.internal.model.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.model.RestOkAutoCompleteResponse;
 import com.mytrip.attractionservice.internal.service.AttractionService;
 import feign.FeignException;
 import feign.Request;
@@ -46,22 +48,17 @@ public class AttractionServiceImplTest {
     @Mock
     AttractionFeignClient attractionClient;
 
+
     @BeforeEach
     public void setUp() {
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
         Optional<Attraction> attractionResponse = Optional.of(this.generateAttraction());
 
+
         when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenReturn(attractionsResponse);
         when(attractionClient.getAttractionsByAttractionId(anyString(), anyString())).thenReturn(attractionResponse);
-    }
 
-    private RestOkAttractionsResponse generateAttractions() {
-        RestOkAttractionsResponse response = new RestOkAttractionsResponse();
-        Attraction attraction = this.generateAttraction();
-        response.restOkAttractionsResponse(Collections.singletonList(attraction));
-        return response;
     }
-
 
     @Test
     public void getAttractionsByCityId(){
@@ -122,6 +119,51 @@ public class AttractionServiceImplTest {
         FeignException feignException = new FeignException.NotFound("test", request, null);
         when(attractionClient.getAttractionsByAttractionId(anyString(), anyString())).thenThrow(feignException);
         assertThrows(AttractionClientPackageNotFoundException.class, () -> attractionService.getAttractionsByAttractionId(ATTRACTION_ID));
+    }
+
+    @Test
+    public void getAttractionByAttractionName() {
+        Optional<RestOkAutoCompleteResponse> expected = Optional.of(this.generateRestOkAutoCompleteResponse());
+        when(attractionClient.getLocationByName(anyString(), anyString())).thenReturn(expected);
+
+        Set<Attraction> actualResponse = attractionService.getAttractionsByAttractionName("Warsaw");
+
+        assertEquals(2, actualResponse.size());
+        Iterator<Attraction> iterator = actualResponse.iterator();
+
+        Attraction firstActualAttraction = iterator.next();
+        assertEquals(expected.get().getData().get(0).getResultObject().getLocation_id(), firstActualAttraction.getLocation_id());
+        assertEquals(expected.get().getData().get(0).getResultObject().getName(), firstActualAttraction.getName());
+        assertEquals(expected.get().getData().get(0).getResultObject().getLatitude(), firstActualAttraction.getLatitude());
+        assertEquals(expected.get().getData().get(0).getResultObject().getLongitude(), firstActualAttraction.getLongitude());
+        assertEquals(expected.get().getData().get(0).getResultObject().getWebsite(), firstActualAttraction.getWebsite());
+
+        Attraction secondActualAttraction = iterator.next();
+        assertEquals(expected.get().getData().get(1).getResultObject().getLocation_id(), secondActualAttraction.getLocation_id());
+        assertEquals(expected.get().getData().get(1).getResultObject().getName(), secondActualAttraction.getName());
+        assertEquals(expected.get().getData().get(1).getResultObject().getLatitude(), secondActualAttraction.getLatitude());
+        assertEquals(expected.get().getData().get(1).getResultObject().getLongitude(), secondActualAttraction.getLongitude());
+        assertEquals(expected.get().getData().get(1).getResultObject().getWebsite(), secondActualAttraction.getWebsite());
+    }
+
+    private RestOkAttractionsResponse generateAttractions() {
+        RestOkAttractionsResponse response = new RestOkAttractionsResponse();
+        Attraction attraction = this.generateAttraction();
+        response.restOkAttractionsResponse(Collections.singletonList(attraction));
+        return response;
+    }
+
+    private RestOkAutoCompleteResponse generateRestOkAutoCompleteResponse() {
+
+        RestOkAutoCompleteResponse response = new RestOkAutoCompleteResponse();
+
+        AutoCompleteAttraction marketSquare = new AutoCompleteAttraction(this.generateAttraction());
+        AutoCompleteAttraction marketSquare2 = new AutoCompleteAttraction(this.generateAttraction());
+        marketSquare2.getResultObject().setLocation_id("1");
+
+        response.setData(Arrays.asList(marketSquare, marketSquare2));
+
+        return response;
     }
 
     private Request generateRequest() {
