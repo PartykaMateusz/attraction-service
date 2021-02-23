@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -79,14 +79,20 @@ public class AttractionServiceImpl implements AttractionService {
     }
 
     @Override
-    public List<Attraction> getAttractionsByAttractionName(String attractionName) {
+    public Set<Attraction> getAttractionsByAttractionName(String attractionName) {
 
         LOGGER.info("searching attractions by name "+attractionName);
 
         try {
-            //TODO create ne model
-            Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getLocationByName(KEY, attractionName);
-            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new AttractionNotFound(attractionName)).getData();
+            Optional<RestOkAutoCompleteResponse> optionalRestOkAutoCompleteResponse = attractionClient.getLocationByName(KEY, attractionName);
+            RestOkAutoCompleteResponse attractionsResponse =
+                    optionalRestOkAutoCompleteResponse.orElseThrow(() -> new AttractionNotFound(attractionName));
+            Set<Attraction> attractions = attractionsResponse.getData()
+                    .stream()
+                    .map(AutoCompleteAttraction::getResultObject)
+                    .filter(attraction -> attraction.getLocation_id() != null)
+                    .collect(Collectors.toSet());
+
             LOGGER.info("returned {} attractions", attractions.size());
             return attractions;
         }

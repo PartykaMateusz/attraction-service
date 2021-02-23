@@ -33,7 +33,7 @@ public interface AttractionFeignClient {
     @RequestMapping(value = "/locations/auto-complete",
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
-    Optional<RestOkAttractionsResponse> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
+    Optional<RestOkAutoCompleteResponse> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
                                                           @RequestParam(name = "query") String query);
 
 

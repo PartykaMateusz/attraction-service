@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/attraction")
@@ -33,7 +34,7 @@ public class AttractionController {
 
     @GetMapping("/search/{attractionName}")
     public ResponseEntity<?> getAttractionByName(@PathVariable String attractionName){
-        List<Attraction> attractions = attractionService.getAttractionsByAttractionName(attractionName);
+        Set<Attraction> attractions = attractionService.getAttractionsByAttractionName(attractionName);
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 }

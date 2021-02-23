@@ -3,6 +3,7 @@ package com.mytrip.attractionservice.internal.service;
 import com.mytrip.attractionservice.internal.model.Attraction;
 
 import java.util.List;
+import java.util.Set;
 
 public interface AttractionService {
 
@@ -10,5 +11,5 @@ public interface AttractionService {
 
     Attraction getAttractionsByAttractionId(Long attractionId);
 
-    List<Attraction> getAttractionsByAttractionName(String attractionName);
+    Set<Attraction> getAttractionsByAttractionName(String attractionName);
 }
