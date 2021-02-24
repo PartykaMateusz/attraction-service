@@ -146,6 +146,22 @@ public class AttractionServiceImplTest {
         assertEquals(expected.get().getData().get(1).getResultObject().getWebsite(), secondActualAttraction.getWebsite());
     }
 
+    @Test
+    public void getAttractionByAttractionNameWhenFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.NotFound("test", request, null);
+        when(attractionClient.getLocationByName(anyString(), anyString())).thenThrow(feignException);
+        assertThrows(AttractionClientPackageNotFoundException.class, () -> attractionService.getAttractionsByAttractionName("Warsaw"));
+    }
+
+    @Test
+    public void getAttractionByAttractionNameWhen500ErrorResponse(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.ServiceUnavailable("test", request, null);
+        when(attractionClient.getLocationByName(anyString(), anyString())).thenThrow(feignException);
+        assertThrows(AttractionException.class, () -> attractionService.getAttractionsByAttractionName("Warsaw"));
+    }
+
     private RestOkAttractionsResponse generateAttractions() {
         RestOkAttractionsResponse response = new RestOkAttractionsResponse();
         Attraction attraction = this.generateAttraction();
