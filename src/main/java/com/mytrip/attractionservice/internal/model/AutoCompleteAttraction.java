@@ -18,6 +18,9 @@ public class AutoCompleteAttraction {
     @JsonProperty("result_object")
     private Attraction resultObject;
 
+    public AutoCompleteAttraction() {
+    }
+
     public AutoCompleteAttraction(Attraction resultObject) {
         this.resultObject = resultObject;
     }
