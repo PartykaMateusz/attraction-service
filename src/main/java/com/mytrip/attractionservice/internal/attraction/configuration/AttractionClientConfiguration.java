@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.configuration;
+package com.mytrip.attractionservice.internal.attraction.configuration;
 
 import feign.Request;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
