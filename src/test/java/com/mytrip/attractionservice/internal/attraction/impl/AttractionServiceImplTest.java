@@ -1,10 +1,9 @@
-package com.mytrip.attractionservice.internal.impl;
+package com.mytrip.attractionservice.internal.attraction.impl;
 
 import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
 import com.mytrip.attractionservice.internal.attraction.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.attraction.impl.AttractionServiceImpl;
 import com.mytrip.attractionservice.internal.attraction.model.Attraction;
 import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
@@ -13,16 +12,14 @@ import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +40,6 @@ public class AttractionServiceImplTest {
     public void setUp() {
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
         Optional<Attraction> attractionResponse = Optional.of(this.generateAttraction());
-
 
         when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenReturn(attractionsResponse);
         when(attractionClient.getAttractionsByAttractionId(anyString(), anyString())).thenReturn(attractionResponse);

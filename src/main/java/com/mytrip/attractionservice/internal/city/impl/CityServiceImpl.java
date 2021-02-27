@@ -1,10 +1,6 @@
 package com.mytrip.attractionservice.internal.city.impl;
 
-import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
-import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.city.CityException;
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
-import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.internal.city.feign.CityFeignClient;
 import com.mytrip.attractionservice.internal.city.model.City;
@@ -12,7 +8,6 @@ import com.mytrip.attractionservice.internal.city.model.CityResponse;
 import com.mytrip.attractionservice.internal.city.model.CityResponseList;
 import com.mytrip.attractionservice.internal.city.service.CityService;
 import feign.FeignException;
-import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
