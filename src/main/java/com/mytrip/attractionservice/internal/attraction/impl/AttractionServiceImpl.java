@@ -1,9 +1,12 @@
-package com.mytrip.attractionservice.internal.impl;
+package com.mytrip.attractionservice.internal.attraction.impl;
 
 import com.mytrip.attractionservice.api.exception.*;
-import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.model.*;
-import com.mytrip.attractionservice.internal.service.AttractionService;
+import com.mytrip.attractionservice.internal.attraction.feign.AttractionFeignClient;
+import com.mytrip.attractionservice.internal.attraction.model.Attraction;
+import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAutoCompleteResponse;
+import com.mytrip.attractionservice.internal.attraction.service.AttractionService;
 
 import feign.FeignException;
 import org.slf4j.Logger;

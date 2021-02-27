@@ -3,30 +3,20 @@ package com.mytrip.attractionservice.internal.impl;
 import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
-import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.model.Attraction;
-import com.mytrip.attractionservice.internal.model.AutoCompleteAttraction;
-import com.mytrip.attractionservice.internal.model.RestOkAttractionsResponse;
-import com.mytrip.attractionservice.internal.model.RestOkAutoCompleteResponse;
-import com.mytrip.attractionservice.internal.service.AttractionService;
+import com.mytrip.attractionservice.internal.attraction.feign.AttractionFeignClient;
+import com.mytrip.attractionservice.internal.attraction.impl.AttractionServiceImpl;
+import com.mytrip.attractionservice.internal.attraction.model.Attraction;
+import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAutoCompleteResponse;
 import feign.FeignException;
 import feign.Request;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-import reactor.core.publisher.Mono;
-
-import javax.inject.Inject;
-import javax.swing.text.html.Option;
-import javax.validation.constraints.Null;
 
 import java.util.*;
 

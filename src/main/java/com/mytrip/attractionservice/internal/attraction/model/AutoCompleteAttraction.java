@@ -1,13 +1,10 @@
-package com.mytrip.attractionservice.internal.model;
+package com.mytrip.attractionservice.internal.attraction.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Setter

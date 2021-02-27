@@ -1,9 +1,10 @@
-package com.mytrip.attractionservice.internal.feign;
+package com.mytrip.attractionservice.internal.attraction.feign;
 
-import com.mytrip.attractionservice.internal.configuration.AttractionClientConfiguration;
-import com.mytrip.attractionservice.internal.model.*;
+import com.mytrip.attractionservice.internal.attraction.configuration.AttractionClientConfiguration;
+import com.mytrip.attractionservice.internal.attraction.model.Attraction;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.attraction.model.RestOkAutoCompleteResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -34,7 +35,7 @@ public interface AttractionFeignClient {
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
     Optional<RestOkAutoCompleteResponse> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
-                                                          @RequestParam(name = "query") String query);
+                                                           @RequestParam(name = "query") String query);
 
 
 }

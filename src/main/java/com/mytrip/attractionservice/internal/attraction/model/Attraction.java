@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.model;
+package com.mytrip.attractionservice.internal.attraction.model;
 
 import lombok.*;
 

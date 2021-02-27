@@ -1,6 +1,6 @@
-package com.mytrip.attractionservice.internal.service;
+package com.mytrip.attractionservice.internal.attraction.service;
 
-import com.mytrip.attractionservice.internal.model.Attraction;
+import com.mytrip.attractionservice.internal.attraction.model.Attraction;
 
 import java.util.List;
 import java.util.Set;
