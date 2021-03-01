@@ -4,7 +4,7 @@ import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoun
 import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.feign.model.Attraction;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -38,8 +39,9 @@ public class AttractionServiceImplTest {
 
     @BeforeEach
     public void setUp() {
+        ReflectionTestUtils.setField(this.attractionService, "KEY", "testKey");
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
-        Optional<Attraction> attractionResponse = Optional.of(this.generateAttraction());
+        Optional<AttractionResponse> attractionResponse = Optional.of(this.generateAttraction());
 
         when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenReturn(attractionsResponse);
         when(attractionClient.getAttractionsByAttractionId(anyString(), anyString())).thenReturn(attractionResponse);
@@ -48,9 +50,8 @@ public class AttractionServiceImplTest {
 
     @Test
     public void getAttractionsByCityId(){
-        Attraction expectedAttraction = this.generateAttraction();
-
-        Attraction actualAttraction = attractionService.getAttractionsByCityId(CITY_ID).get(0);
+        AttractionResponse expectedAttraction = this.generateAttraction();
+        AttractionResponse actualAttraction = attractionService.getAttractionsByCityId(CITY_ID).get(0);
 
         assertEquals(expectedAttraction.getLocation_id(), actualAttraction.getLocation_id());
         assertEquals(expectedAttraction.getName(), actualAttraction.getName());
@@ -77,9 +78,9 @@ public class AttractionServiceImplTest {
 
     @Test
     public void getAttractionsById(){
-        Attraction expectedAttraction = this.generateAttraction();
+        AttractionResponse expectedAttraction = this.generateAttraction();
 
-        Attraction actualAttraction = attractionService.getAttractionsByAttractionId(ATTRACTION_ID);
+        AttractionResponse actualAttraction = attractionService.getAttractionsByAttractionId(ATTRACTION_ID);
 
         assertEquals(expectedAttraction.getLocation_id(), actualAttraction.getLocation_id());
         assertEquals(expectedAttraction.getName(), actualAttraction.getName());
@@ -90,7 +91,7 @@ public class AttractionServiceImplTest {
 
     @Test
     public void getAttractionsByIdWhenAttractionNotFound(){
-        Attraction expectedAttraction = this.generateAttraction();
+        AttractionResponse expectedAttraction = this.generateAttraction();
         expectedAttraction.setLocation_id(null);
         when(attractionClient
                 .getAttractionsByAttractionId(anyString(), anyString()))
@@ -112,19 +113,19 @@ public class AttractionServiceImplTest {
         Optional<RestOkAutoCompleteResponse> expected = Optional.of(this.generateRestOkAutoCompleteResponse());
         when(attractionClient.getLocationByName(anyString(), anyString())).thenReturn(expected);
 
-        Set<Attraction> actualResponse = attractionService.getAttractionsByAttractionName("Warsaw");
+        Set<AttractionResponse> actualResponse = attractionService.getAttractionsByAttractionName("Warsaw");
 
         assertEquals(2, actualResponse.size());
-        Iterator<Attraction> iterator = actualResponse.iterator();
+        Iterator<AttractionResponse> iterator = actualResponse.iterator();
 
-        Attraction firstActualAttraction = iterator.next();
+        AttractionResponse firstActualAttraction = iterator.next();
         assertEquals(expected.get().getData().get(0).getResultObject().getLocation_id(), firstActualAttraction.getLocation_id());
         assertEquals(expected.get().getData().get(0).getResultObject().getName(), firstActualAttraction.getName());
         assertEquals(expected.get().getData().get(0).getResultObject().getLatitude(), firstActualAttraction.getLatitude());
         assertEquals(expected.get().getData().get(0).getResultObject().getLongitude(), firstActualAttraction.getLongitude());
         assertEquals(expected.get().getData().get(0).getResultObject().getWebsite(), firstActualAttraction.getWebsite());
 
-        Attraction secondActualAttraction = iterator.next();
+        AttractionResponse secondActualAttraction = iterator.next();
         assertEquals(expected.get().getData().get(1).getResultObject().getLocation_id(), secondActualAttraction.getLocation_id());
         assertEquals(expected.get().getData().get(1).getResultObject().getName(), secondActualAttraction.getName());
         assertEquals(expected.get().getData().get(1).getResultObject().getLatitude(), secondActualAttraction.getLatitude());
@@ -150,7 +151,7 @@ public class AttractionServiceImplTest {
 
     private RestOkAttractionsResponse generateAttractions() {
         RestOkAttractionsResponse response = new RestOkAttractionsResponse();
-        Attraction attraction = this.generateAttraction();
+        AttractionResponse attraction = this.generateAttraction();
         response.restOkAttractionsResponse(Collections.singletonList(attraction));
         return response;
     }
@@ -174,8 +175,8 @@ public class AttractionServiceImplTest {
         return request;
     }
 
-    private Attraction generateAttraction() {
-        Attraction attraction = new Attraction();
+    private AttractionResponse generateAttraction() {
+        AttractionResponse attraction = new AttractionResponse();
         attraction.setLocation_id("4872855");
         attraction.setName("Market Square");
         attraction.setLatitude("50.037384");
