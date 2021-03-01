@@ -1,15 +1,15 @@
 package com.mytrip.attractionservice.internal.attraction.service;
 
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 
 import java.util.List;
 import java.util.Set;
 
 public interface AttractionService {
 
-    List<Attraction> getAttractionsByCityId(Long cityId);
+    List<AttractionResponse> getAttractionsByCityId(Long cityId);
 
-    Attraction getAttractionsByAttractionId(Long attractionId);
+    AttractionResponse getAttractionsByAttractionId(Long attractionId);
 
-    Set<Attraction> getAttractionsByAttractionName(String attractionName);
+    Set<AttractionResponse> getAttractionsByAttractionName(String attractionName);
 }

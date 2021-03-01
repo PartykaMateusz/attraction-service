@@ -1,7 +1,5 @@
 package com.mytrip.attractionservice.api.controller;
 
-import com.mytrip.attractionservice.internal.attraction.impl.AttractionServiceImpl;
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
 import com.mytrip.attractionservice.internal.city.model.City;
 import com.mytrip.attractionservice.internal.city.service.CityService;
 import org.springframework.beans.factory.annotation.Autowired;

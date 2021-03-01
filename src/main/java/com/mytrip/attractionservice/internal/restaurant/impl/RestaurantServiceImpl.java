@@ -1,13 +1,11 @@
 package com.mytrip.attractionservice.internal.restaurant.impl;
 
-import com.mytrip.attractionservice.api.exception.AttractionClientPackageNotFoundException;
-import com.mytrip.attractionservice.api.exception.AttractionException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
-import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
-import com.mytrip.attractionservice.internal.restaurant.feign.RestaurantFeignClient;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
+import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.restaurant.service.RestaurantService;
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -35,13 +33,13 @@ public class RestaurantServiceImpl implements RestaurantService {
     private RestaurantFeignClient restaurantFeignClient;
 
     @Override
-    public List<Attraction> getRestaurantsByCoordinates(final String latitude, final String longitude) {
+    public List<AttractionResponse> getRestaurantsByCoordinates(final String latitude, final String longitude) {
 
         LOGGER.info("searching restaurants by latitude: {}, longitude: {} ", latitude, longitude);
 
         try {
             Optional<RestOkAttractionsResponse> attractionsResponse = restaurantFeignClient.getRestaurantsByCoordinates(KEY, latitude, longitude);
-            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(latitude, longitude))
+            List<AttractionResponse> attractions = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(latitude, longitude))
                     .getData()
                     .stream()
                     .filter(attraction -> attraction.getLocation_id() != null)

@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.attraction.model;
+package com.mytrip.attractionservice.internal.feign.model.attraction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

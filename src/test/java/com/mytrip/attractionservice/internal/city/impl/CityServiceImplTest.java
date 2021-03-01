@@ -2,7 +2,7 @@ package com.mytrip.attractionservice.internal.city.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
-import com.mytrip.attractionservice.internal.city.feign.CityFeignClient;
+import com.mytrip.attractionservice.internal.feign.CityFeignClient;
 import com.mytrip.attractionservice.internal.city.model.City;
 import com.mytrip.attractionservice.internal.city.model.CityResponse;
 import com.mytrip.attractionservice.internal.city.model.CityResponseList;

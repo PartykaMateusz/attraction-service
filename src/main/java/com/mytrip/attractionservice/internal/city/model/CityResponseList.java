@@ -1,7 +1,6 @@
 package com.mytrip.attractionservice.internal.city.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
 import lombok.Data;
 
 import java.util.ArrayList;

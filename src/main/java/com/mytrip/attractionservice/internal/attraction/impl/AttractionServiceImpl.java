@@ -1,11 +1,12 @@
 package com.mytrip.attractionservice.internal.attraction.impl;
 
 import com.mytrip.attractionservice.api.exception.*;
-import com.mytrip.attractionservice.internal.attraction.feign.AttractionFeignClient;
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
-import com.mytrip.attractionservice.internal.attraction.model.AutoCompleteAttraction;
-import com.mytrip.attractionservice.internal.attraction.model.RestOkAttractionsResponse;
-import com.mytrip.attractionservice.internal.attraction.model.RestOkAutoCompleteResponse;
+import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
+
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AutoCompleteAttraction;
+import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
 import com.mytrip.attractionservice.internal.attraction.service.AttractionService;
 
 import feign.FeignException;
@@ -37,13 +38,13 @@ public class AttractionServiceImpl implements AttractionService {
     private AttractionFeignClient attractionClient;
 
     @Override
-    public List<Attraction> getAttractionsByCityId(Long cityId) {
+    public List<AttractionResponse> getAttractionsByCityId(Long cityId) {
 
         LOGGER.info("searching attractions in city "+cityId);
 
         try {
             Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
-            List<Attraction> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId)).getData();
+            List<AttractionResponse> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId)).getData();
             LOGGER.info("returned {} attractions in {} city", attractions.size(), cityId);
             return attractions;
         }
@@ -58,12 +59,12 @@ public class AttractionServiceImpl implements AttractionService {
     }
 
     @Override
-    public Attraction getAttractionsByAttractionId(Long attractionId) {
+    public AttractionResponse getAttractionsByAttractionId(Long attractionId) {
         LOGGER.info("searching attractions by ID:  "+attractionId);
 
         try {
-            Optional<Attraction> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
-            Attraction attraction = attractionsResponse.orElseThrow(() -> new AttractionNotFoundException(attractionId));
+            Optional<AttractionResponse> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
+            AttractionResponse attraction = attractionsResponse.orElseThrow(() -> new AttractionNotFoundException(attractionId));
             if (attraction.getLocation_id() == null) {
                 //TODO make cool exception resolver
                 LOGGER.warn("Attraction not found. attractionId: {}", attractionId);
@@ -84,7 +85,7 @@ public class AttractionServiceImpl implements AttractionService {
     }
 
     @Override
-    public Set<Attraction> getAttractionsByAttractionName(String attractionName) {
+    public Set<AttractionResponse> getAttractionsByAttractionName(String attractionName) {
 
         LOGGER.info("searching attractions by name "+attractionName);
 
@@ -92,7 +93,7 @@ public class AttractionServiceImpl implements AttractionService {
             Optional<RestOkAutoCompleteResponse> optionalRestOkAutoCompleteResponse = attractionClient.getLocationByName(KEY, attractionName);
             RestOkAutoCompleteResponse attractionsResponse =
                     optionalRestOkAutoCompleteResponse.orElseThrow(() -> new AttractionNotFound(attractionName));
-            Set<Attraction> attractions = attractionsResponse.getData()
+            Set<AttractionResponse> attractions = attractionsResponse.getData()
                     .stream()
                     .map(AutoCompleteAttraction::getResultObject)
                     .filter(attraction -> attraction.getLocation_id() != null)

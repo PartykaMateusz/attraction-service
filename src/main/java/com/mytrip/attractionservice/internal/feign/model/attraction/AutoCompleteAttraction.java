@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.attraction.model;
+package com.mytrip.attractionservice.internal.feign.model.attraction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -13,12 +13,12 @@ import lombok.ToString;
 public class AutoCompleteAttraction {
 
     @JsonProperty("result_object")
-    private Attraction resultObject;
+    private AttractionResponse resultObject;
 
     public AutoCompleteAttraction() {
     }
 
-    public AutoCompleteAttraction(Attraction resultObject) {
+    public AutoCompleteAttraction(AttractionResponse resultObject) {
         this.resultObject = resultObject;
     }
 }

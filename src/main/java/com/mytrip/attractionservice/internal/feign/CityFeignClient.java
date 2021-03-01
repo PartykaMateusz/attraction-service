@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.city.feign;
+package com.mytrip.attractionservice.internal.feign;
 
 import com.mytrip.attractionservice.internal.city.model.CityResponseList;
 import org.springframework.cloud.openfeign.FeignClient;

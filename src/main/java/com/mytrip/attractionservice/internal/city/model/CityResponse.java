@@ -1,7 +1,6 @@
 package com.mytrip.attractionservice.internal.city.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mytrip.attractionservice.internal.attraction.model.Attraction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
