@@ -6,6 +6,7 @@ import com.mytrip.attractionservice.internal.feign.CityFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.service.impl.CityServiceImpl;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;

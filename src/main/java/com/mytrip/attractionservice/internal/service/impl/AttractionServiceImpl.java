@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.attraction.impl;
+package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.*;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;

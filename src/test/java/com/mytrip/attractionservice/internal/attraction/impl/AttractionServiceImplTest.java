@@ -8,6 +8,7 @@ import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionRe
 import com.mytrip.attractionservice.internal.feign.model.attraction.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
+import com.mytrip.attractionservice.internal.service.impl.AttractionServiceImpl;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;

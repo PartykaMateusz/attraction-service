@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.restaurant.impl;
+package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;

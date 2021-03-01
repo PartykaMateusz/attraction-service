@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.city.impl;
+package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
