@@ -7,7 +7,7 @@ import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionRe
 import com.mytrip.attractionservice.internal.feign.model.attraction.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
-import com.mytrip.attractionservice.internal.attraction.service.AttractionService;
+import com.mytrip.attractionservice.internal.service.AttractionService;
 
 import feign.FeignException;
 import org.slf4j.Logger;

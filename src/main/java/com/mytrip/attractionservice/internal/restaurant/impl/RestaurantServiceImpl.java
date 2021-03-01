@@ -6,7 +6,7 @@ import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFoun
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
-import com.mytrip.attractionservice.internal.restaurant.service.RestaurantService;
+import com.mytrip.attractionservice.internal.service.RestaurantService;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

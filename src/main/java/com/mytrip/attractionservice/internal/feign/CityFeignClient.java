@@ -1,6 +1,6 @@
 package com.mytrip.attractionservice.internal.feign;
 
-import com.mytrip.attractionservice.internal.city.model.CityResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;

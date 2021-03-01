@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.attraction.service;
+package com.mytrip.attractionservice.internal.service;
 
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 

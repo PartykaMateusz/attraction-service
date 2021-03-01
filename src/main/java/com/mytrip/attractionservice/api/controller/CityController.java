@@ -1,7 +1,7 @@
 package com.mytrip.attractionservice.api.controller;
 
-import com.mytrip.attractionservice.internal.city.model.City;
-import com.mytrip.attractionservice.internal.city.service.CityService;
+import com.mytrip.attractionservice.internal.feign.model.city.City;
+import com.mytrip.attractionservice.internal.service.CityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
