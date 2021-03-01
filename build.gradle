@@ -26,6 +26,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'junit:junit:4.12'
 	implementation 'junit:junit:4.12'
 	compileOnly 'org.projectlombok:lombok'
@@ -35,6 +36,7 @@ dependencies {
 	}
 	implementation 'org.springdoc:springdoc-openapi-ui:1.4.4'
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
+	//implementation group: 'org.springframework.cloud', name: 'spring-cloud-config-client', version: '3.0.2'
 }
 
 dependencyManagement {

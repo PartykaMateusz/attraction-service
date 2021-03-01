@@ -11,6 +11,7 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,10 @@ import java.util.stream.Collectors;
 public class CityServiceImpl implements CityService {
 
     private static final String GEOS = "geos";
-    private final String KEY = "6791fde3e0msha209aa7ca51fc34p12803ejsn6025ca677714";
+
+    @Value("${rapidApi.tripAdvisor.key}")
+    private String KEY;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CityServiceImpl.class);
     private static final String CITIES_SERVICE_5XX_ERROR = "CITIES_SERVICE_5XX_ERROR";
     private static final String GET_CITIES_INFO_NOT_FOUND = "GET_CITIES_INFO_NOT_FOUND";

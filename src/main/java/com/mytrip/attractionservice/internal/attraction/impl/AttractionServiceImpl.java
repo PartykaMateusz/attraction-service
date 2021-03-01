@@ -12,6 +12,7 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.stereotype.Service;
@@ -29,7 +30,8 @@ public class AttractionServiceImpl implements AttractionService {
     private static final String ATTRACTIONS_SERVICE_5XX_ERROR = "ATTRACTIONS_SERVICE_5XX_ERROR";
     private static final String GET_ATTRACTIONS_INFO_NOT_FOUND = "GET_ATTRACTIONS_INFO_NOT_FOUND";
 
-    private final String KEY = "6791fde3e0msha209aa7ca51fc34p12803ejsn6025ca677714";
+    @Value("${rapidApi.tripAdvisor.key}")
+    private String KEY;
 
     @Autowired
     private AttractionFeignClient attractionClient;
