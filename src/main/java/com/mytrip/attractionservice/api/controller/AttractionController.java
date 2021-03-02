@@ -1,5 +1,6 @@
 package com.mytrip.attractionservice.api.controller;
 
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.AttractionService;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,19 +23,13 @@ public class AttractionController {
 
     @GetMapping("/city/{cityId}")
     public ResponseEntity<?> getAttractionsByCityId(@PathVariable Long cityId){
-        List<AttractionResponse> attractions = attractionService.getAttractionsByCityId(cityId);
+        List<Location> attractions = attractionService.getAttractionsByCityId(cityId);
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 
     @GetMapping("/{attractionId}")
     public ResponseEntity<?> getAttractionById(@PathVariable Long attractionId){
-        AttractionResponse attractions = attractionService.getAttractionsByAttractionId(attractionId);
-        return new ResponseEntity<>(attractions, HttpStatus.OK);
-    }
-
-    @GetMapping("/search/{attractionName}")
-    public ResponseEntity<?> getAttractionByName(@PathVariable String attractionName){
-        Set<AttractionResponse> attractions = attractionService.getAttractionsByAttractionName(attractionName);
+        Location attractions = attractionService.getAttractionsByAttractionId(attractionId);
         return new ResponseEntity<>(attractions, HttpStatus.OK);
     }
 }

@@ -7,6 +7,7 @@ import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionRe
 import com.mytrip.attractionservice.internal.feign.model.attraction.AutoCompleteAttraction;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.AttractionService;
 
 import feign.FeignException;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -37,14 +39,22 @@ public class AttractionServiceImpl implements AttractionService {
     @Autowired
     private AttractionFeignClient attractionClient;
 
+    @Autowired
+    private Function<AttractionResponse, Location> attractionMapper;
+
     @Override
-    public List<AttractionResponse> getAttractionsByCityId(Long cityId) {
+    public List<Location> getAttractionsByCityId(Long cityId) {
 
         LOGGER.info("searching attractions in city "+cityId);
 
         try {
             Optional<RestOkAttractionsResponse> attractionsResponse = attractionClient.getAttractionsByCityId(KEY, cityId.toString());
-            List<AttractionResponse> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId)).getData();
+            List<Location> attractions = attractionsResponse.orElseThrow(() -> new AttractionsInCityNotFound(cityId))
+                    .getData()
+                    .stream()
+                    .filter(attraction -> attraction.getLocationId() != null && attraction.getName() != null)
+                    .map(this.attractionMapper)
+                    .collect(Collectors.toList());
             LOGGER.info("returned {} attractions in {} city", attractions.size(), cityId);
             return attractions;
         }
@@ -59,7 +69,7 @@ public class AttractionServiceImpl implements AttractionService {
     }
 
     @Override
-    public AttractionResponse getAttractionsByAttractionId(Long attractionId) {
+    public Location getAttractionsByAttractionId(Long attractionId) {
         LOGGER.info("searching attractions by ID:  "+attractionId);
 
         try {
@@ -71,7 +81,7 @@ public class AttractionServiceImpl implements AttractionService {
                 throw new AttractionNotFoundException(attractionId);
             }
             LOGGER.info("successfully returned attraction. name: {}, id: {}", attraction.getName(), attractionId);
-            return attraction;
+            return this.attractionMapper.apply(attraction);
         }
         catch (FeignException e) {
             if (e.status() == HttpStatus.NOT_FOUND.value()) {
@@ -82,34 +92,6 @@ public class AttractionServiceImpl implements AttractionService {
 
             throw e;
         }
-    }
-
-    @Override
-    public Set<AttractionResponse> getAttractionsByAttractionName(String attractionName) {
-
-        LOGGER.info("searching attractions by name "+attractionName);
-
-        try {
-            Optional<RestOkAutoCompleteResponse> optionalRestOkAutoCompleteResponse = attractionClient.getLocationByName(KEY, attractionName);
-            RestOkAutoCompleteResponse attractionsResponse =
-                    optionalRestOkAutoCompleteResponse.orElseThrow(() -> new AttractionNotFound(attractionName));
-            Set<AttractionResponse> attractions = attractionsResponse.getData()
-                    .stream()
-                    .map(AutoCompleteAttraction::getResultObject)
-                    .filter(attraction -> attraction.getLocationId() != null)
-                    .collect(Collectors.toSet());
-
-            LOGGER.info("returned {} attractions", attractions.size());
-            return attractions;
-        }
-        catch (FeignException e) {
-            if (e.status() == HttpStatus.NOT_FOUND.value()) {
-                this.handleNotFoundResponse(attractionName);
-            }
-            LOGGER.error(ATTRACTIONS_SERVICE_5XX_ERROR, "Attractions service 5xx error. status code : {0}", e.status());
-        }
-        this.handleUnexpectedResponse();
-        return null;
     }
 
     private void handleNotFoundResponse(Long cityId) {
