@@ -65,7 +65,7 @@ public class AttractionServiceImpl implements AttractionService {
         try {
             Optional<AttractionResponse> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, attractionId.toString());
             AttractionResponse attraction = attractionsResponse.orElseThrow(() -> new AttractionNotFoundException(attractionId));
-            if (attraction.getLocation_id() == null) {
+            if (attraction.getLocationId() == null) {
                 //TODO make cool exception resolver
                 LOGGER.warn("Attraction not found. attractionId: {}", attractionId);
                 throw new AttractionNotFoundException(attractionId);
@@ -96,7 +96,7 @@ public class AttractionServiceImpl implements AttractionService {
             Set<AttractionResponse> attractions = attractionsResponse.getData()
                     .stream()
                     .map(AutoCompleteAttraction::getResultObject)
-                    .filter(attraction -> attraction.getLocation_id() != null)
+                    .filter(attraction -> attraction.getLocationId() != null)
                     .collect(Collectors.toSet());
 
             LOGGER.info("returned {} attractions", attractions.size());

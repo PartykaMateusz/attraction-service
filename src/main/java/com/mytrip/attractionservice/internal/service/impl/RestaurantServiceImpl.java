@@ -42,7 +42,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             List<AttractionResponse> attractions = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(latitude, longitude))
                     .getData()
                     .stream()
-                    .filter(attraction -> attraction.getLocation_id() != null)
+                    .filter(attraction -> attraction.getLocationId() != null)
                     .filter(attraction -> attraction.getName() != null)
                     .collect(Collectors.toList());
             LOGGER.info("returned {} attractions in latitude: {}, longitude: {}", attractions.size(), latitude, longitude);
