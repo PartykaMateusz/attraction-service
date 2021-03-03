@@ -1,6 +1,6 @@
 package com.mytrip.attractionservice.api.controller;
 
-import com.mytrip.attractionservice.internal.feign.model.city.City;
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.CityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,10 @@ public class CityController {
     @Autowired
     private CityService cityService;
 
-    @GetMapping("")
-    public ResponseEntity<?> searchCityByName(@RequestParam(name = "name")
+    @GetMapping("{cityName}")
+    public ResponseEntity<?> searchCityByName(@PathVariable(name = "cityName")
                                                   @Min(value = 3, message = "require 3 or more characters") final String cityName){
-        Set<City> cities = cityService.getCityByName(cityName);
+        Set<Location> cities = cityService.getCityByName(cityName);
         return new ResponseEntity<>(cities, HttpStatus.OK);
     }
 }

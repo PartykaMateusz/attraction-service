@@ -3,9 +3,11 @@ package com.mytrip.attractionservice.internal.service.impl;
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.CityService;
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,8 +37,11 @@ public class CityServiceImpl implements CityService {
     @Autowired
     private CityFeignClient cityClient;
 
+    @Autowired
+    private Function<City, Location> cityMapper;
+
     @Override
-    public Set<City> getCityByName(String cityName) {
+    public Set<Location> getCityByName(String cityName) {
 
         LOGGER.info("searching cities by name "+cityName);
 
@@ -43,11 +49,12 @@ public class CityServiceImpl implements CityService {
             Optional<CityResponseList> optionalCityResponseList = cityClient.getLocationByName(KEY, cityName);
             CityResponseList citiesResponse =
                     optionalCityResponseList.orElseThrow(() -> new CityNotFound(cityName));
-            Set<City> cities = citiesResponse.getData()
+            Set<Location> cities = citiesResponse.getData()
                     .stream()
                     .filter(cityResponse -> cityResponse.getResultType().equals(GEOS))
                     .map(CityResponse::getResultObject)
                     .filter(city -> city.getLocationId() != null)
+                    .map(this.cityMapper)
                     .collect(Collectors.toSet());
 
             LOGGER.info("returned {} cities", cities.size());
