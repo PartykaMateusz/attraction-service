@@ -12,6 +12,11 @@ import java.util.function.Function;
 @Component
 public class AttractionMapper implements Function<AttractionResponse, Location> {
 
+    private static final String CITY = "city";
+    private static final String COUNTRY = "country";
+    private static final String PROVINCE = "province";
+    private static final String REGION = "region";
+
     @Override
     public Location apply(final AttractionResponse attractionResponse) {
         Location location = new Location();
@@ -41,6 +46,20 @@ public class AttractionMapper implements Function<AttractionResponse, Location> 
     }
 
     private void applyAncestors(final Location location, final List<AncestorResponse> ancestors) {
-        //TODDO ancestors
+        for (AncestorResponse ancestor : ancestors) {
+            final String key = ancestor.getSubcategory().get(0).getKey();
+            if (key.equals(CITY)) {
+                location.setCity(ancestor.getName());
+            }
+            if (key.equals(COUNTRY)) {
+                location.setCountry(ancestor.getName());
+            }
+            if (key.equals(PROVINCE)) {
+                location.setProvince(ancestor.getName());
+            }
+            if (key.equals(REGION)) {
+                location.setRegion(ancestor.getName());
+            }
+        }
     }
 }
