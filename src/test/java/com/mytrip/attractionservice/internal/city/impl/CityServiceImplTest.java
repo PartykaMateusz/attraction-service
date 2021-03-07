@@ -3,8 +3,10 @@ package com.mytrip.attractionservice.internal.city.impl;
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
+import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.impl.CityServiceImpl;
 import feign.FeignException;
 import feign.Request;
@@ -44,14 +46,14 @@ public class CityServiceImplTest {
         CityResponseList expectedResponseList = generateCityResponseList();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<City> cities = cityService.getCityByName(CITY_NAME);
+        Set<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
         City expectedCity = expectedResponseList.getData().get(0).getResultObject();
 
-        Iterator<City> iterator = cities.iterator();
-        City actualCity = iterator.next();
+        Iterator<Location> iterator = cities.iterator();
+        Location actualCity = iterator.next();
 
         assertEquals(expectedCity.getName(), actualCity.getName());
         assertEquals(expectedCity.getLatitude(), actualCity.getLatitude());
@@ -66,14 +68,14 @@ public class CityServiceImplTest {
         CityResponseList expectedResponseList = generateCityResponseListWithCityAndRestaurant();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<City> cities = cityService.getCityByName(CITY_NAME);
+        Set<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
         City expectedCity = expectedResponseList.getData().get(0).getResultObject();
 
-        Iterator<City> iterator = cities.iterator();
-        City actualCity = iterator.next();
+        Iterator<Location> iterator = cities.iterator();
+        Location actualCity = iterator.next();
 
         assertEquals(expectedCity.getName(), actualCity.getName());
         assertEquals(expectedCity.getLatitude(), actualCity.getLatitude());
