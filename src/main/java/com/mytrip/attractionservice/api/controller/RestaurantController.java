@@ -1,6 +1,7 @@
 package com.mytrip.attractionservice.api.controller;
 
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
+import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class RestaurantController {
     @GetMapping("")
     public ResponseEntity<?> getRestaurantsInCity(@RequestParam(name="latitude") String latitude,
                                                   @RequestParam(name="longitude") String longitude) {
-        List<AttractionResponse> restaurants = this.restaurantService.getRestaurantsByCoordinates(latitude, longitude);
+        List<Location> restaurants = this.restaurantService.getRestaurantsByCoordinates(latitude, longitude);
         return ResponseEntity.ok(restaurants);
     }
 

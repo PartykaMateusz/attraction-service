@@ -6,6 +6,8 @@ import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFoun
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
+import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.mapper.AttractionMapper;
 import com.mytrip.attractionservice.internal.service.RestaurantService;
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -32,18 +34,22 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Autowired
     private RestaurantFeignClient restaurantFeignClient;
 
+    @Autowired
+    private AttractionMapper attractionMapper;
+
     @Override
-    public List<AttractionResponse> getRestaurantsByCoordinates(final String latitude, final String longitude) {
+    public List<Location> getRestaurantsByCoordinates(final String latitude, final String longitude) {
 
         LOGGER.info("searching restaurants by latitude: {}, longitude: {} ", latitude, longitude);
 
         try {
             Optional<RestOkAttractionsResponse> attractionsResponse = restaurantFeignClient.getRestaurantsByCoordinates(KEY, latitude, longitude);
-            List<AttractionResponse> attractions = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(latitude, longitude))
+            List<Location> attractions = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(latitude, longitude))
                     .getData()
                     .stream()
                     .filter(attraction -> attraction.getLocationId() != null)
                     .filter(attraction -> attraction.getName() != null)
+                    .map(attraction -> attractionMapper.apply(attraction))
                     .collect(Collectors.toList());
             LOGGER.info("returned {} attractions in latitude: {}, longitude: {}", attractions.size(), latitude, longitude);
             return attractions;
