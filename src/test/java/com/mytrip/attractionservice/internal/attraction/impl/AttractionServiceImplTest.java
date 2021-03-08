@@ -9,56 +9,63 @@ import com.mytrip.attractionservice.internal.feign.model.attraction.AutoComplete
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAutoCompleteResponse;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.mapper.AttractionMapper;
 import com.mytrip.attractionservice.internal.service.impl.AttractionServiceImpl;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class AttractionServiceImplTest {
 
     private static final Long CITY_ID = 274785L;
     private static final Long ATTRACTION_ID = 4872855L;
+    private static final String TEST_KEY = "testKey";
 
     @InjectMocks
     private AttractionServiceImpl attractionService;
 
     @Mock
-    AttractionFeignClient attractionClient;
+    private AttractionFeignClient attractionClient;
+
+    @Mock
+    private Function<AttractionResponse, Location> attractionMapper;
 
     @BeforeEach
     public void setUp() {
-        ReflectionTestUtils.setField(this.attractionService, "KEY", "testKey");
+        ReflectionTestUtils.setField(this.attractionService, "KEY", TEST_KEY);
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
         Optional<AttractionResponse> attractionResponse = Optional.of(this.generateAttraction());
 
-        when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenReturn(attractionsResponse);
+        when(attractionClient.getAttractionsByCityId(TEST_KEY, CITY_ID.toString())).thenReturn(attractionsResponse);
         when(attractionClient.getAttractionsByAttractionId(anyString(), anyString())).thenReturn(attractionResponse);
-
     }
 
     @Test
     public void getAttractionsByCityId(){
-        AttractionResponse expectedAttraction = this.generateAttraction();
-        Location actualAttraction = attractionService.getAttractionsByCityId(CITY_ID).get(0);
-
-        assertEquals(expectedAttraction.getLocationId(), actualAttraction.getLocationId());
-        assertEquals(expectedAttraction.getName(), actualAttraction.getName());
-        assertEquals(expectedAttraction.getLatitude(), actualAttraction.getLatitude());
-        assertEquals(expectedAttraction.getLongitude(), actualAttraction.getLongitude());
-        assertEquals(expectedAttraction.getWebsite(), actualAttraction.getWebsite());
+        attractionService.getAttractionsByCityId(CITY_ID).get(0);
+        verify(attractionClient).getAttractionsByCityId(TEST_KEY, CITY_ID.toString());
+        verify(attractionMapper).apply(any());
     }
 
     @Test
@@ -66,6 +73,7 @@ public class AttractionServiceImplTest {
         Request request = generateRequest();
         FeignException feignException = new FeignException.NotFound("test", request, null);
         when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
         assertThrows(AttractionClientPackageNotFoundException.class, () -> attractionService.getAttractionsByCityId(CITY_ID).get(0));
     }
 
@@ -74,20 +82,16 @@ public class AttractionServiceImplTest {
         Request request = generateRequest();
         FeignException feignException = new FeignException.ServiceUnavailable("test", request, null);
         when(attractionClient.getAttractionsByCityId(anyString(), anyString())).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
         assertThrows(AttractionException.class, () -> attractionService.getAttractionsByCityId(CITY_ID).get(0));
     }
 
     @Test
     public void getAttractionsById(){
-        AttractionResponse expectedAttraction = this.generateAttraction();
-
-        Location actualAttraction = attractionService.getAttractionsByAttractionId(ATTRACTION_ID);
-
-        assertEquals(expectedAttraction.getLocationId(), actualAttraction.getLocationId());
-        assertEquals(expectedAttraction.getName(), actualAttraction.getName());
-        assertEquals(expectedAttraction.getLatitude(), actualAttraction.getLatitude());
-        assertEquals(expectedAttraction.getLongitude(), actualAttraction.getLongitude());
-        assertEquals(expectedAttraction.getWebsite(), actualAttraction.getWebsite());
+        this.generateAttraction();
+        attractionService.getAttractionsByAttractionId(ATTRACTION_ID);
+        verify(attractionClient).getAttractionsByAttractionId(TEST_KEY, ATTRACTION_ID.toString());
+        verify(attractionMapper).apply(any());
     }
 
     @Test
@@ -97,7 +101,7 @@ public class AttractionServiceImplTest {
         when(attractionClient
                 .getAttractionsByAttractionId(anyString(), anyString()))
                 .thenReturn(Optional.of(expectedAttraction));
-
+        verify(attractionMapper, never()).apply(any());
         assertThrows(AttractionNotFoundException.class, () -> attractionService.getAttractionsByAttractionId(ATTRACTION_ID));
     }
 
@@ -116,23 +120,8 @@ public class AttractionServiceImplTest {
         return response;
     }
 
-    private RestOkAutoCompleteResponse generateRestOkAutoCompleteResponse() {
-
-        RestOkAutoCompleteResponse response = new RestOkAutoCompleteResponse();
-
-        AutoCompleteAttraction marketSquare = new AutoCompleteAttraction(this.generateAttraction());
-        AutoCompleteAttraction marketSquare2 = new AutoCompleteAttraction(this.generateAttraction());
-        marketSquare2.getResultObject().setLocationId("1");
-
-        response.setData(Arrays.asList(marketSquare, marketSquare2));
-
-        return response;
-    }
-
     private Request generateRequest() {
-        Request request = Request.create(Request.HttpMethod.GET, "test", new HashMap<>(), (byte[]) null, null);
-
-        return request;
+        return Request.create(Request.HttpMethod.GET, "test", new HashMap<>(), (byte[]) null, null);
     }
 
     private AttractionResponse generateAttraction() {
