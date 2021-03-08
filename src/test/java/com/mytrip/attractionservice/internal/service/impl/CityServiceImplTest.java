@@ -1,4 +1,4 @@
-package com.mytrip.attractionservice.internal.city.impl;
+package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
@@ -7,7 +7,6 @@ import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
-import com.mytrip.attractionservice.internal.service.impl.CityServiceImpl;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +17,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class CityServiceImplTest {
 
     private static final String CITY_NAME = "Warsaw";
     private static final String GEOS = "geos";
+    private static final String KEY = "testKey" ;
 
     @InjectMocks
     private CityServiceImpl cityService;
@@ -36,9 +38,12 @@ public class CityServiceImplTest {
     @Mock
     CityFeignClient cityFeignClient;
 
+    @Mock
+    private Function<City, Location> cityMapper;
+
     @BeforeEach
     public void setUp() {
-        ReflectionTestUtils.setField(this.cityService, "KEY", "testKey");
+        ReflectionTestUtils.setField(this.cityService, "KEY", KEY);
     }
 
     @Test
@@ -50,17 +55,8 @@ public class CityServiceImplTest {
 
         assertEquals(1, cities.size());
 
-        City expectedCity = expectedResponseList.getData().get(0).getResultObject();
-
-        Iterator<Location> iterator = cities.iterator();
-        Location actualCity = iterator.next();
-
-        assertEquals(expectedCity.getName(), actualCity.getName());
-        assertEquals(expectedCity.getLatitude(), actualCity.getLatitude());
-        assertEquals(expectedCity.getLongitude(), actualCity.getLongitude());
-        assertEquals(expectedCity.getLocation(), actualCity.getLocation());
-        assertEquals(expectedCity.getLocationId(), actualCity.getLocationId());
-        assertEquals(expectedCity.getTimezone(), actualCity.getTimezone());
+        verify(cityMapper).apply(any());
+        verify(cityFeignClient).getLocationByName(KEY, CITY_NAME);
     }
 
     @Test
@@ -72,17 +68,8 @@ public class CityServiceImplTest {
 
         assertEquals(1, cities.size());
 
-        City expectedCity = expectedResponseList.getData().get(0).getResultObject();
-
-        Iterator<Location> iterator = cities.iterator();
-        Location actualCity = iterator.next();
-
-        assertEquals(expectedCity.getName(), actualCity.getName());
-        assertEquals(expectedCity.getLatitude(), actualCity.getLatitude());
-        assertEquals(expectedCity.getLongitude(), actualCity.getLongitude());
-        assertEquals(expectedCity.getLocation(), actualCity.getLocation());
-        assertEquals(expectedCity.getLocationId(), actualCity.getLocationId());
-        assertEquals(expectedCity.getTimezone(), actualCity.getTimezone());
+        verify(cityMapper).apply(any());
+        verify(cityFeignClient).getLocationByName(KEY, CITY_NAME);
     }
 
     @Test
@@ -90,6 +77,7 @@ public class CityServiceImplTest {
         Request request = generateRequest();
         FeignException feignException = new FeignException.NotFound("test", request, null);
         when(cityFeignClient.getLocationByName(anyString(), anyString())).thenThrow(feignException);
+        verify(cityMapper, never()).apply(any());
         assertThrows(CityNotFound.class, () -> cityService.getCityByName(CITY_NAME));
     }
 
@@ -98,6 +86,7 @@ public class CityServiceImplTest {
         Request request = generateRequest();
         FeignException feignException = new FeignException.ServiceUnavailable("test", request, null);
         when(cityFeignClient.getLocationByName(anyString(), anyString())).thenThrow(feignException);
+        verify(cityMapper, never()).apply(any());
         assertThrows(CityException.class, () -> cityService.getCityByName(CITY_NAME));
     }
 
