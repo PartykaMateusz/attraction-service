@@ -8,6 +8,7 @@ import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.mapper.CityMapper;
 import com.mytrip.attractionservice.internal.service.CityService;
 import feign.FeignException;
 import org.slf4j.Logger;
