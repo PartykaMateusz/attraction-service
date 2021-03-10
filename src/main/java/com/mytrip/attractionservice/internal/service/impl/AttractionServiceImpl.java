@@ -103,9 +103,4 @@ public class AttractionServiceImpl implements AttractionService {
         LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Unexpected error");
         throw new AttractionException();
     }
-
-    private void handleNotFoundResponse(String attractionName) {
-        LOGGER.info(GET_ATTRACTIONS_INFO_NOT_FOUND, "Attractions {0} not found }", attractionName);
-        throw new AttractionClientPackageNotFoundException(attractionName);
-    }
 }
