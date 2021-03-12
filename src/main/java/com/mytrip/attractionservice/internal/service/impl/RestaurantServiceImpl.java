@@ -1,5 +1,6 @@
 package com.mytrip.attractionservice.internal.service.impl;
 
+import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
@@ -7,6 +8,7 @@ import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.service.CityService;
 import com.mytrip.attractionservice.internal.service.RestaurantService;
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -16,8 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private Function<AttractionResponse, Location> attractionMapper;
+
+    @Autowired
+    private CityService cityService;
 
     @Override
     public List<Location> getRestaurantsByCoordinates(final String latitude, final String longitude) {
@@ -62,6 +69,19 @@ public class RestaurantServiceImpl implements RestaurantService {
         }
         this.handleUnexpectedResponse();
         return null;
+    }
+
+    @Override
+    public List<Location> getRestaurantsByCity(final String cityName) {
+        LOGGER.info("searching restaurants by cityName: {} ", cityName);
+
+        final List<Location> cities = cityService.getCityByName(cityName);
+        if (cities.isEmpty()) {
+            LOGGER.debug("City: {} not found ", cityName);
+            throw new CityNotFound(cityName);
+        }
+        final Location city = cities.get(0);
+        return this.getRestaurantsByCoordinates(city.getLatitude(), city.getLongitude());
     }
 
     private void handleNotFoundResponse(final String latitude, final String longitude) {
