@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Min;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -20,7 +21,7 @@ public class CityController {
     @GetMapping("{cityName}")
     public ResponseEntity<?> searchCityByName(@PathVariable(name = "cityName")
                                                   @Min(value = 3, message = "require 3 or more characters") final String cityName){
-        Set<Location> cities = cityService.getCityByName(cityName);
+        List<Location> cities = cityService.getCityByName(cityName);
         return new ResponseEntity<>(cities, HttpStatus.OK);
     }
 }

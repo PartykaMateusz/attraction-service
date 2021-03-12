@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -42,7 +43,7 @@ public class CityServiceImpl implements CityService {
     private Function<City, Location> cityMapper;
 
     @Override
-    public Set<Location> getCityByName(String cityName) {
+    public List<Location> getCityByName(String cityName) {
 
         LOGGER.info("searching cities by name "+cityName);
 
@@ -50,13 +51,13 @@ public class CityServiceImpl implements CityService {
             Optional<CityResponseList> optionalCityResponseList = cityClient.getLocationByName(KEY, cityName);
             CityResponseList citiesResponse =
                     optionalCityResponseList.orElseThrow(() -> new CityNotFound(cityName));
-            Set<Location> cities = citiesResponse.getData()
+            List<Location> cities = citiesResponse.getData()
                     .stream()
                     .filter(cityResponse -> cityResponse.getResultType().equals(GEOS))
                     .map(CityResponse::getResultObject)
                     .filter(city -> city.getLocationId() != null)
                     .map(this.cityMapper)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
 
             LOGGER.info("returned {} cities", cities.size());
             return cities;
