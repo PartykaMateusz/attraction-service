@@ -51,7 +51,7 @@ public class CityServiceImplTest {
         CityResponseList expectedResponseList = generateCityResponseList();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<Location> cities = cityService.getCityByName(CITY_NAME);
+        List<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
@@ -64,7 +64,7 @@ public class CityServiceImplTest {
         CityResponseList expectedResponseList = generateCityResponseListWithCityAndRestaurant();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<Location> cities = cityService.getCityByName(CITY_NAME);
+        List<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
