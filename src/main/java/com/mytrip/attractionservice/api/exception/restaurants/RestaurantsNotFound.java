@@ -20,6 +20,6 @@ public class RestaurantsNotFound extends RuntimeException {
     }
 
     private static String buildErrorMessage(final String latitude, final String longitude) {
-        return MessageFormat.format("Unable to find restaurants by latitude: {0}, longitude: {}", latitude, longitude);
+        return String.format("Unable to find restaurants by latitude: {}, longitude: {}", latitude, longitude);
     }
 }

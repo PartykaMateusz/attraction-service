@@ -3,6 +3,8 @@ package com.mytrip.attractionservice.internal.service.impl;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
+import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
+import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
@@ -10,6 +12,7 @@ import com.mytrip.attractionservice.internal.feign.model.city.City;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.LocationType;
 import com.mytrip.attractionservice.internal.service.CityService;
 import feign.FeignException;
 import feign.Request;
@@ -24,6 +27,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,6 +40,7 @@ public class RestaurantServiceImplTest {
     private static final String LATITUDE = "50";
     private static final String LONGITUDE = "20";
     private static final String CITY_NAME = "cityName";
+    private static final String RESTAURANT_ID = "12";
 
     @InjectMocks
     private RestaurantServiceImpl restaurantService;
@@ -49,7 +54,16 @@ public class RestaurantServiceImplTest {
     @Mock
     private CityService cityService;
 
+    @Mock
+    private AttractionFeignClient attractionClient;
+
     private List<Location> attractions = this.generateCities();
+
+    private AttractionResponse attractionResponse = this.generateAttraction();
+
+    private Location restaurantLocation = this.generateRestaurantLocation();
+
+
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +71,17 @@ public class RestaurantServiceImplTest {
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
         when(restaurantFeignClient.getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE)).thenReturn(attractionsResponse);
         when(this.cityService.getCityByName(CITY_NAME)).thenReturn(attractions);
+        when(this.attractionClient.getAttractionsByAttractionId(KEY, RESTAURANT_ID)).thenReturn(Optional.of(attractionResponse));
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.restaurantLocation);
     }
+
+    @Test
+    public void getRestaurantsById(){
+        Location location = restaurantService.getRestaurantById(RESTAURANT_ID);
+        assertNotNull(location);
+        verify(attractionMapper).apply(any());
+    }
+
 
     @Test
     public void getRestaurantsByCoordinates(){
@@ -75,7 +99,7 @@ public class RestaurantServiceImplTest {
         FeignException feignException = new FeignException.NotFound("test", request, null);
         when(restaurantFeignClient.getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE)).thenThrow(feignException);
         verify(attractionMapper, never()).apply(any());
-        assertThrows(RestaurantClientPackageNotFoundException.class, () -> restaurantService.getRestaurantsByCoordinates(LATITUDE, LONGITUDE));
+        assertThrows(RestaurantsNotFound.class, () -> restaurantService.getRestaurantsByCoordinates(LATITUDE, LONGITUDE));
     }
 
     @Test
@@ -116,11 +140,21 @@ public class RestaurantServiceImplTest {
 
     private AttractionResponse generateAttraction() {
         AttractionResponse attraction = new AttractionResponse();
-        attraction.setLocationId("750466");
+        attraction.setLocationId(RESTAURANT_ID);
         attraction.setName("Compact Okocim Klub");
         attraction.setLatitude("52.229263");
         attraction.setLongitude("21.01181");
         return attraction;
+    }
+
+    private Location generateRestaurantLocation() {
+        Location restaurant = new Location();
+        restaurant.setName("Compact Okocim Klub");
+        restaurant.setLocationId(RESTAURANT_ID);
+        restaurant.setLatitude("52.229263");
+        restaurant.setLongitude("21.01181");
+        restaurant.setLocationType(LocationType.RESTAURANT);
+        return restaurant;
     }
 
     private Request generateRequest() {

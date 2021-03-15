@@ -56,15 +56,18 @@ public class RestaurantServiceImpl implements RestaurantService {
         LOGGER.info("searching restaurant by id " + restaurantId);
 
         try {
-            Optional<AttractionResponse> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, restaurantId);
-            AttractionResponse attraction = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(restaurantId));
+            final Optional<AttractionResponse> attractionsResponse
+                    = attractionClient.getAttractionsByAttractionId(KEY, restaurantId);
+            final AttractionResponse attraction = attractionsResponse
+                    .orElseThrow(() -> new RestaurantsNotFound(restaurantId));
             if (attraction.getLocationId() == null) {
                 LOGGER.warn("Restaurant not found. attractionId: {}", restaurantId);
                 throw new RestaurantsNotFound(restaurantId);
             }
             Location restaurant = this.attractionMapper.apply(attraction);
             if (!isRestaurant(restaurant)) {
-                LOGGER.warn("Location {}, with id: {} found, but type: {} is wrong", restaurant.getName(), restaurantId, restaurant.getLocationType());
+                LOGGER.warn("Location {}, with id: {} found, but type: {} is wrong",
+                        restaurant.getName(), restaurantId, restaurant.getLocationType());
                 throw new RestaurantsNotFound(restaurantId);
             }
             LOGGER.info("successfully returned restaurant. name: {}, id: {}", attraction.getName(), restaurantId);
@@ -81,7 +84,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     private boolean isRestaurant(final Location restaurant) {
-        return restaurant.getLocationType().equals(LocationType.RESTAURANT);
+        return  restaurant.getLocationType() != null
+                && restaurant.getLocationType().equals(LocationType.RESTAURANT);
     }
 
     @Override
