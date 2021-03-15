@@ -11,6 +11,13 @@ public class RestaurantsNotFound extends RuntimeException {
     public RestaurantsNotFound(final String latitude, final String longitude) {
         super(buildErrorMessage(latitude, longitude));
     }
+    public RestaurantsNotFound(final String restaurantId) {
+        super(buildErrorMessage(restaurantId));
+    }
+
+    private static String buildErrorMessage(final String restaurantId) {
+        return MessageFormat.format("Unable to find restaurants by id: {}", restaurantId);
+    }
 
     private static String buildErrorMessage(final String latitude, final String longitude) {
         return MessageFormat.format("Unable to find restaurants by latitude: {0}, longitude: {}", latitude, longitude);

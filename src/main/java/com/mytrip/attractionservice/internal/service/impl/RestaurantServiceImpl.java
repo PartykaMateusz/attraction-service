@@ -1,13 +1,17 @@
 package com.mytrip.attractionservice.internal.service.impl;
 
+import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
+import com.mytrip.attractionservice.api.exception.AttractionsInCityNotFound;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
+import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.LocationType;
 import com.mytrip.attractionservice.internal.service.CityService;
 import com.mytrip.attractionservice.internal.service.RestaurantService;
 import feign.FeignException;
@@ -43,6 +47,42 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private CityService cityService;
+
+    @Autowired
+    private AttractionFeignClient attractionClient;
+
+    @Override
+    public Location getRestaurantById(final String restaurantId) {
+        LOGGER.info("searching restaurant by id " + restaurantId);
+
+        try {
+            Optional<AttractionResponse> attractionsResponse = attractionClient.getAttractionsByAttractionId(KEY, restaurantId);
+            AttractionResponse attraction = attractionsResponse.orElseThrow(() -> new RestaurantsNotFound(restaurantId));
+            if (attraction.getLocationId() == null) {
+                LOGGER.warn("Restaurant not found. attractionId: {}", restaurantId);
+                throw new RestaurantsNotFound(restaurantId);
+            }
+            Location restaurant = this.attractionMapper.apply(attraction);
+            if (!isRestaurant(restaurant)) {
+                LOGGER.warn("Location {}, with id: {} found, but type: {} is wrong", restaurant.getName(), restaurantId, restaurant.getLocationType());
+                throw new RestaurantsNotFound(restaurantId);
+            }
+            LOGGER.info("successfully returned restaurant. name: {}, id: {}", attraction.getName(), restaurantId);
+            return restaurant;
+        }
+        catch (FeignException e) {
+            if (e.status() == HttpStatus.NOT_FOUND.value()) {
+                handleNotFoundResponse(restaurantId);
+            }
+
+            LOGGER.error(RESTAURANTS_SERVICE_5XX_ERROR, "Restaurant service 5xx error. status code : {0}", e.status());
+            throw e;
+        }
+    }
+
+    private boolean isRestaurant(final Location restaurant) {
+        return restaurant.getLocationType().equals(LocationType.RESTAURANT);
+    }
 
     @Override
     public List<Location> getRestaurantsByCoordinates(final String latitude, final String longitude) {
@@ -86,7 +126,12 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private void handleNotFoundResponse(final String latitude, final String longitude) {
         LOGGER.info(GET_RESTAURANTS_INFO_NOT_FOUND, "Restaurants not found for latitude: {}, longitude: {}", latitude, longitude);
-        throw new RestaurantClientPackageNotFoundException(latitude, longitude);
+        throw new RestaurantsNotFound(latitude, longitude);
+    }
+
+    private void handleNotFoundResponse(final String restaurantId) {
+        LOGGER.info(GET_RESTAURANTS_INFO_NOT_FOUND, "Restaurants not found for id: {}", restaurantId);
+        throw new RestaurantsNotFound(restaurantId);
     }
 
     private void handleUnexpectedResponse() {
