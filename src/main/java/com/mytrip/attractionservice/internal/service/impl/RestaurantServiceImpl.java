@@ -1,15 +1,15 @@
 package com.mytrip.attractionservice.internal.service.impl;
 
-import com.mytrip.attractionservice.api.exception.AttractionNotFoundException;
-import com.mytrip.attractionservice.api.exception.AttractionsInCityNotFound;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
-import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoComplete;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponse;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.model.LocationType;
 import com.mytrip.attractionservice.internal.service.CityService;
@@ -22,10 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,6 +32,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestaurantServiceImpl.class);
     private static final String RESTAURANTS_SERVICE_5XX_ERROR = "RESTAURANTS_SERVICE_5XX_ERROR";
     private static final String GET_RESTAURANTS_INFO_NOT_FOUND = "GET_RESTAURANTS_INFO_NOT_FOUND";
+    private static final String RESTAURANTS = "restaurants";
 
     @Value("${rapidApi.tripAdvisor.key}")
     private String KEY;
@@ -50,6 +48,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private AttractionFeignClient attractionClient;
+
+    @Autowired
+    private Function<AutoComplete, Location> restaurantMapper;
 
     @Override
     public Location getRestaurantById(final String restaurantId) {
@@ -82,6 +83,26 @@ public class RestaurantServiceImpl implements RestaurantService {
             this.handleUnexpectedResponse();
         }
         return null;
+    }
+
+    @Override
+    public List<Location> getRestaurantByName(final String restaurantName) {
+        LOGGER.info("searching restaurant by name " + restaurantName);
+
+        Optional<AutoCompleteResponseList> optionalRestaurants = this.restaurantFeignClient.getRestaurantByName(KEY, restaurantName);
+        AutoCompleteResponseList restaurantsResponse =
+                optionalRestaurants.orElseThrow(() -> new RestaurantsNotFound(restaurantName));
+
+        List<Location> restaurants = restaurantsResponse.getData()
+                .stream()
+                .filter(cityResponse -> cityResponse.getResultType().equals(RESTAURANTS))
+                .map(AutoCompleteResponse::getResultObject)
+                .filter(city -> city.getLocationId() != null)
+                .map(this.restaurantMapper)
+                .collect(Collectors.toList());
+
+        LOGGER.info("returned {} restaurants", restaurants.size());
+        return restaurants;
     }
 
     private boolean isRestaurant(final Location restaurant) {
@@ -122,7 +143,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         final List<Location> cities = cityService.getCityByName(cityName);
         if (cities.isEmpty()) {
-            LOGGER.debug("City: {} not found ", cityName);
+            LOGGER.debug("AutoComplete: {} not found ", cityName);
             throw new CityNotFound(cityName);
         }
         final Location city = cities.get(0);

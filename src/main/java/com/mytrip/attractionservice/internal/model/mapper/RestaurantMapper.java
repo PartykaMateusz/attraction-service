@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class CityMapper implements Function<AutoComplete, Location> {
+public class RestaurantMapper implements Function<AutoComplete, Location> {
 
     private static final String CITY = "city";
     private static final String COUNTRY = "country";
@@ -21,7 +21,7 @@ public class CityMapper implements Function<AutoComplete, Location> {
     @Override
     public Location apply(final AutoComplete autoComplete) {
         Location location = new Location();
-        location.setLocationType(LocationType.CITY);
+        location.setLocationType(LocationType.RESTAURANT);
         location.setCity(autoComplete.getName());
         location.setLocationId(autoComplete.getLocationId());
         location.setLocation(autoComplete.getLocation());

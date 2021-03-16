@@ -1,16 +1,15 @@
 package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
-import com.mytrip.attractionservice.api.exception.restaurants.RestaurantClientPackageNotFoundException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantException;
 import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.RestaurantFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.attraction.RestOkAttractionsResponse;
-import com.mytrip.attractionservice.internal.feign.model.city.City;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoComplete;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponse;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.model.LocationType;
 import com.mytrip.attractionservice.internal.service.CityService;
@@ -20,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -41,6 +40,8 @@ public class RestaurantServiceImplTest {
     private static final String LONGITUDE = "20";
     private static final String CITY_NAME = "cityName";
     private static final String RESTAURANT_ID = "12";
+    private static final String RESTAURANT_NAME = "Compact Okocim Klub";
+    private static final String RESTAURANTS = "restaurants";
 
     @InjectMocks
     private RestaurantServiceImpl restaurantService;
@@ -57,6 +58,9 @@ public class RestaurantServiceImplTest {
     @Mock
     private AttractionFeignClient attractionClient;
 
+    @Mock
+    private Function<AutoComplete, Location> restaurantMapper;
+
     private List<Location> attractions = this.generateCities();
 
     private AttractionResponse attractionResponse = this.generateAttraction();
@@ -68,6 +72,7 @@ public class RestaurantServiceImplTest {
         ReflectionTestUtils.setField(this.restaurantService, "KEY", KEY);
         Optional<RestOkAttractionsResponse> attractionsResponse = Optional.of(this.generateAttractions());
         when(restaurantFeignClient.getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE)).thenReturn(attractionsResponse);
+        when(this.restaurantFeignClient.getRestaurantByName(KEY, RESTAURANT_NAME)).thenReturn(Optional.of(this.generateRestaurantResponseList()));
         when(this.cityService.getCityByName(CITY_NAME)).thenReturn(attractions);
         when(this.attractionClient.getAttractionsByAttractionId(KEY, RESTAURANT_ID)).thenReturn(Optional.of(attractionResponse));
         when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.restaurantLocation);
@@ -161,6 +166,18 @@ public class RestaurantServiceImplTest {
         assertThrows(CityNotFound.class, () -> restaurantService.getRestaurantsByCity(CITY_NAME));
     }
 
+    @Test
+    public void getRestaurantsByName(){
+        //when(this.cityService.getCityByName(CITY_NAME)).thenReturn(Collections.emptyList());
+
+       // verify(attractionMapper, never()).apply(any());
+       // verify(restaurantFeignClient, never()).getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE);
+
+        List<Location> restaurants = restaurantService.getRestaurantByName(RESTAURANT_NAME);
+
+        assertEquals(1, restaurants.size());
+    }
+
     private RestOkAttractionsResponse generateAttractions() {
         RestOkAttractionsResponse response = new RestOkAttractionsResponse();
         AttractionResponse attraction = this.generateAttraction();
@@ -171,7 +188,7 @@ public class RestaurantServiceImplTest {
     private AttractionResponse generateAttraction() {
         AttractionResponse attraction = new AttractionResponse();
         attraction.setLocationId(RESTAURANT_ID);
-        attraction.setName("Compact Okocim Klub");
+        attraction.setName(RESTAURANT_NAME);
         attraction.setLatitude("52.229263");
         attraction.setLongitude("21.01181");
         return attraction;
@@ -206,5 +223,53 @@ public class RestaurantServiceImplTest {
         city.setLatitude(LATITUDE);
         city.setLongitude(LONGITUDE);
         return city;
+    }
+
+    private AutoCompleteResponseList generateRestaurantResponseList() {
+        AutoCompleteResponseList cityResponseList = new AutoCompleteResponseList();
+        cityResponseList.setData(generateData());
+        return cityResponseList;
+    }
+
+    private AutoCompleteResponseList generateRestaurantResponseListWithCityAndRestaurant() {
+        AutoCompleteResponseList cityResponseList = new AutoCompleteResponseList();
+        cityResponseList.setData(generateDataWithCityAndRestaurant());
+        return cityResponseList;
+    }
+
+    private List<AutoCompleteResponse> generateDataWithCityAndRestaurant() {
+        AutoComplete warsaw = generateAutoCompleteWarsaw();
+        AutoCompleteResponse cityResponse = new AutoCompleteResponse(RESTAURANTS, warsaw);
+        AutoComplete restaurant = generateRestaurant();
+        AutoCompleteResponse restaurantResponse = new AutoCompleteResponse("restaurant", restaurant);
+        return List.of(cityResponse, restaurantResponse);
+    }
+
+    private List<AutoCompleteResponse> generateData() {
+        AutoComplete warsaw = generateAutoCompleteWarsaw();
+        AutoCompleteResponse cityResponse = new AutoCompleteResponse(RESTAURANTS, warsaw);
+        return List.of(cityResponse);
+    }
+
+    private AutoComplete generateAutoCompleteWarsaw() {
+        AutoComplete autoComplete = new AutoComplete();
+        autoComplete.setName("Warsaw");
+        autoComplete.setTimezone("Europe/Warsaw");
+        autoComplete.setLocation("Warsaw, Poland");
+        autoComplete.setLocationId("274856");
+        autoComplete.setLatitude("52.229263");
+        autoComplete.setLongitude("21.01181");
+        return autoComplete;
+    }
+
+    private AutoComplete generateRestaurant() {
+        AutoComplete restaurant = new AutoComplete();
+        restaurant.setName("restaurant");
+        restaurant.setTimezone("Europe/Warsaw");
+        restaurant.setLocation("Warsaw, Poland");
+        restaurant.setLocationId("274856");
+        restaurant.setLatitude("52.229263");
+        restaurant.setLongitude("21.01181");
+        return restaurant;
     }
 }

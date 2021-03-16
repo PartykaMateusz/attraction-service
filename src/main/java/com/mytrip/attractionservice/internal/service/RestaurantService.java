@@ -11,4 +11,6 @@ public interface RestaurantService {
     List<Location> getRestaurantsByCity(String cityName);
 
     Location getRestaurantById(String restaurantId);
+
+    List<Location> getRestaurantByName(String restaurantName);
 }

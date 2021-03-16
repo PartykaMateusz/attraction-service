@@ -10,18 +10,18 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class CityResponse {
+public class AutoCompleteResponse {
 
     @JsonProperty("result_type")
     private String resultType;
 
     @JsonProperty("result_object")
-    private City resultObject;
+    private AutoComplete resultObject;
 
-    public CityResponse() {
+    public AutoCompleteResponse() {
     }
 
-    public CityResponse(final String resultType, final City resultObject) {
+    public AutoCompleteResponse(final String resultType, final AutoComplete resultObject) {
         this.resultType = resultType;
         this.resultObject = resultObject;
     }

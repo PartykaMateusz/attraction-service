@@ -23,6 +23,12 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurants);
     }
 
+    @GetMapping("/name/{restaurantName}")
+    public ResponseEntity<?> getRestaurantByName(@PathVariable String restaurantName) {
+        List<Location> restaurants = this.restaurantService.getRestaurantByName(restaurantName);
+        return ResponseEntity.ok(restaurants);
+    }
+
     @GetMapping("/city")
     public ResponseEntity<?> getRestaurantsInCity(@RequestParam(name="latitude") String latitude,
                                                   @RequestParam(name="longitude") String longitude) {
