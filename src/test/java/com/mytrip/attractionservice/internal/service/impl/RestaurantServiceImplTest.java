@@ -63,8 +63,6 @@ public class RestaurantServiceImplTest {
 
     private Location restaurantLocation = this.generateRestaurantLocation();
 
-
-
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(this.restaurantService, "KEY", KEY);
@@ -82,13 +80,45 @@ public class RestaurantServiceImplTest {
         verify(attractionMapper).apply(any());
     }
 
+    @Test
+    public void getRestaurantsByIdWhenLocationIdIsNull(){
+        AttractionResponse attractionResponse = this.generateAttraction();
+        attractionResponse.setLocationId(null);
+        when(this.attractionClient.getAttractionsByAttractionId(KEY, RESTAURANT_ID)).thenReturn(Optional.of(attractionResponse));
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.restaurantLocation);
+        assertThrows(RestaurantsNotFound.class, () -> restaurantService.getRestaurantById(RESTAURANT_ID));
+    }
+
+    @Test
+    public void getRestaurantsByIdWhenLocationIsFoundButTypeIsWrong(){
+        AttractionResponse attractionResponse = this.generateAttraction();
+        restaurantLocation.setLocationType(LocationType.CITY);
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.restaurantLocation);
+        assertThrows(RestaurantsNotFound.class, () -> restaurantService.getRestaurantById(RESTAURANT_ID));
+    }
+
+    @Test
+    public void getRestaurantsByIdWhenFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.NotFound("test", request, null);
+        when(attractionClient.getAttractionsByAttractionId(KEY, RESTAURANT_ID)).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
+        assertThrows(RestaurantsNotFound.class, () -> restaurantService.getRestaurantById(RESTAURANT_ID));
+    }
+
+    @Test
+    public void getRestaurantsByIdWhen5XXFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.BadGateway("test", request, null);
+        when(attractionClient.getAttractionsByAttractionId(KEY, RESTAURANT_ID)).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
+        assertThrows(RestaurantException.class, () -> restaurantService.getRestaurantById(RESTAURANT_ID));
+    }
 
     @Test
     public void getRestaurantsByCoordinates(){
         List<Location> locations = restaurantService.getRestaurantsByCoordinates(LATITUDE, LONGITUDE);
-
         assertEquals(1, locations.size());
-
         verify(attractionMapper).apply(any());
         verify(restaurantFeignClient).getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE);
     }

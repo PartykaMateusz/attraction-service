@@ -79,12 +79,13 @@ public class RestaurantServiceImpl implements RestaurantService {
             }
 
             LOGGER.error(RESTAURANTS_SERVICE_5XX_ERROR, "Restaurant service 5xx error. status code : {0}", e.status());
-            throw e;
+            this.handleUnexpectedResponse();
         }
+        return null;
     }
 
     private boolean isRestaurant(final Location restaurant) {
-        return  restaurant.getLocationType() != null
+        return restaurant.getLocationType() != null
                 && restaurant.getLocationType().equals(LocationType.RESTAURANT);
     }
 
