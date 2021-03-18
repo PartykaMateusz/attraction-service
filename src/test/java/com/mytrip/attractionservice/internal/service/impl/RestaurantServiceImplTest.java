@@ -168,14 +168,34 @@ public class RestaurantServiceImplTest {
 
     @Test
     public void getRestaurantsByName(){
-        //when(this.cityService.getCityByName(CITY_NAME)).thenReturn(Collections.emptyList());
-
-       // verify(attractionMapper, never()).apply(any());
-       // verify(restaurantFeignClient, never()).getRestaurantsByCoordinates(KEY, LATITUDE, LONGITUDE);
-
         List<Location> restaurants = restaurantService.getRestaurantByName(RESTAURANT_NAME);
 
+        verify(restaurantMapper).apply(any());
+        verify(restaurantFeignClient).getRestaurantByName(KEY, RESTAURANT_NAME);
+
         assertEquals(1, restaurants.size());
+    }
+
+    @Test
+    public void getRestaurantsByNameWhenFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.NotFound("test", request, null);
+
+        when(this.restaurantFeignClient.getRestaurantByName(KEY, RESTAURANT_NAME)).thenThrow(feignException);
+
+        verify(restaurantMapper, never()).apply(any());
+        assertThrows(RestaurantsNotFound.class, () -> restaurantService.getRestaurantByName(RESTAURANT_NAME));
+    }
+
+    @Test
+    public void getRestaurantsByNameWhen5XXFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.BadGateway("test", request, null);
+
+        when(this.restaurantFeignClient.getRestaurantByName(KEY, RESTAURANT_NAME)).thenThrow(feignException);
+
+        verify(restaurantMapper, never()).apply(any());
+        assertThrows(RestaurantException.class, () -> restaurantService.getRestaurantByName(RESTAURANT_NAME));
     }
 
     private RestOkAttractionsResponse generateAttractions() {

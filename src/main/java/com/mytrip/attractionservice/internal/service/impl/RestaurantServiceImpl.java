@@ -89,20 +89,31 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<Location> getRestaurantByName(final String restaurantName) {
         LOGGER.info("searching restaurant by name " + restaurantName);
 
-        Optional<AutoCompleteResponseList> optionalRestaurants = this.restaurantFeignClient.getRestaurantByName(KEY, restaurantName);
-        AutoCompleteResponseList restaurantsResponse =
-                optionalRestaurants.orElseThrow(() -> new RestaurantsNotFound(restaurantName));
+        try {
+            Optional<AutoCompleteResponseList> optionalRestaurants = this.restaurantFeignClient.getRestaurantByName(KEY, restaurantName);
+            AutoCompleteResponseList restaurantsResponse =
+                    optionalRestaurants.orElseThrow(() -> new RestaurantsNotFound(restaurantName));
 
-        List<Location> restaurants = restaurantsResponse.getData()
-                .stream()
-                .filter(cityResponse -> cityResponse.getResultType().equals(RESTAURANTS))
-                .map(AutoCompleteResponse::getResultObject)
-                .filter(city -> city.getLocationId() != null)
-                .map(this.restaurantMapper)
-                .collect(Collectors.toList());
+            List<Location> restaurants = restaurantsResponse.getData()
+                    .stream()
+                    .filter(cityResponse -> cityResponse.getResultType().equals(RESTAURANTS))
+                    .map(AutoCompleteResponse::getResultObject)
+                    .filter(city -> city.getLocationId() != null)
+                    .map(this.restaurantMapper)
+                    .collect(Collectors.toList());
 
-        LOGGER.info("returned {} restaurants", restaurants.size());
-        return restaurants;
+            LOGGER.info("returned {} restaurants", restaurants.size());
+            return restaurants;
+        }
+        catch (FeignException e)  {
+            if (e.status() == HttpStatus.NOT_FOUND.value()) {
+                handleNotFoundResponse(restaurantName);
+            }
+
+            LOGGER.error(RESTAURANTS_SERVICE_5XX_ERROR, "Restaurant service 5xx error. status code : {0}", e.status());
+            this.handleUnexpectedResponse();
+        }
+        return null;
     }
 
     private boolean isRestaurant(final Location restaurant) {
