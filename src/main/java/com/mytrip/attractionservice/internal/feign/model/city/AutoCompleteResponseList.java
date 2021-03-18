@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CityResponseList {
+public class AutoCompleteResponseList {
 
     @JsonProperty("data")
-    private List<CityResponse> data = new ArrayList<>();
+    private List<AutoCompleteResponse> data = new ArrayList<>();
 }

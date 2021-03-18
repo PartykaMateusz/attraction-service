@@ -9,4 +9,8 @@ public interface RestaurantService {
     List<Location> getRestaurantsByCoordinates(String latitude, String longitude);
 
     List<Location> getRestaurantsByCity(String cityName);
+
+    Location getRestaurantById(String restaurantId);
+
+    List<Location> getRestaurantByName(String restaurantName);
 }

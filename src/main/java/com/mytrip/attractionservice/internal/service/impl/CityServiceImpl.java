@@ -3,12 +3,10 @@ package com.mytrip.attractionservice.internal.service.impl;
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
-import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
-import com.mytrip.attractionservice.internal.feign.model.city.City;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoComplete;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponse;
 import com.mytrip.attractionservice.internal.model.Location;
-import com.mytrip.attractionservice.internal.model.mapper.CityMapper;
 import com.mytrip.attractionservice.internal.service.CityService;
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,7 +37,7 @@ public class CityServiceImpl implements CityService {
     private CityFeignClient cityClient;
 
     @Autowired
-    private Function<City, Location> cityMapper;
+    private Function<AutoComplete, Location> cityMapper;
 
     @Override
     public List<Location> getCityByName(String cityName) {
@@ -48,13 +45,13 @@ public class CityServiceImpl implements CityService {
         LOGGER.info("searching cities by name "+cityName);
 
         try {
-            Optional<CityResponseList> optionalCityResponseList = cityClient.getLocationByName(KEY, cityName);
-            CityResponseList citiesResponse =
+            Optional<AutoCompleteResponseList> optionalCityResponseList = cityClient.getLocationByName(KEY, cityName);
+            AutoCompleteResponseList citiesResponse =
                     optionalCityResponseList.orElseThrow(() -> new CityNotFound(cityName));
             List<Location> cities = citiesResponse.getData()
                     .stream()
                     .filter(cityResponse -> cityResponse.getResultType().equals(GEOS))
-                    .map(CityResponse::getResultObject)
+                    .map(AutoCompleteResponse::getResultObject)
                     .filter(city -> city.getLocationId() != null)
                     .map(this.cityMapper)
                     .collect(Collectors.toList());
@@ -73,7 +70,7 @@ public class CityServiceImpl implements CityService {
     }
 
     private void handleNotFoundResponse(final String cityName) {
-        LOGGER.info(GET_CITIES_INFO_NOT_FOUND, "City {0} notFound", cityName);
+        LOGGER.info(GET_CITIES_INFO_NOT_FOUND, "AutoComplete {0} notFound", cityName);
         throw new CityNotFound(cityName);
     }
 

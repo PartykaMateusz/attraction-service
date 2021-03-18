@@ -3,9 +3,9 @@ package com.mytrip.attractionservice.internal.service.impl;
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
-import com.mytrip.attractionservice.internal.feign.model.city.City;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponse;
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoComplete;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponse;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
 import feign.FeignException;
 import feign.Request;
@@ -39,7 +39,7 @@ public class CityServiceImplTest {
     CityFeignClient cityFeignClient;
 
     @Mock
-    private Function<City, Location> cityMapper;
+    private Function<AutoComplete, Location> cityMapper;
 
     @BeforeEach
     public void setUp() {
@@ -48,10 +48,10 @@ public class CityServiceImplTest {
 
     @Test
     public void getCityByName(){
-        CityResponseList expectedResponseList = generateCityResponseList();
+        AutoCompleteResponseList expectedResponseList = generateCityResponseList();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<Location> cities = cityService.getCityByName(CITY_NAME);
+        List<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
@@ -61,10 +61,10 @@ public class CityServiceImplTest {
 
     @Test
     public void getCityByNameWhenApiReturnedNotCity(){
-        CityResponseList expectedResponseList = generateCityResponseListWithCityAndRestaurant();
+        AutoCompleteResponseList expectedResponseList = generateCityResponseListWithCityAndRestaurant();
         when(this.cityFeignClient.getLocationByName(anyString(), anyString())).thenReturn(Optional.of(expectedResponseList));
 
-        Set<Location> cities = cityService.getCityByName(CITY_NAME);
+        List<Location> cities = cityService.getCityByName(CITY_NAME);
 
         assertEquals(1, cities.size());
 
@@ -90,45 +90,45 @@ public class CityServiceImplTest {
         assertThrows(CityException.class, () -> cityService.getCityByName(CITY_NAME));
     }
 
-    private CityResponseList generateCityResponseList() {
-        CityResponseList cityResponseList = new CityResponseList();
+    private AutoCompleteResponseList generateCityResponseList() {
+        AutoCompleteResponseList cityResponseList = new AutoCompleteResponseList();
         cityResponseList.setData(generateData());
         return cityResponseList;
     }
 
-    private CityResponseList generateCityResponseListWithCityAndRestaurant() {
-        CityResponseList cityResponseList = new CityResponseList();
+    private AutoCompleteResponseList generateCityResponseListWithCityAndRestaurant() {
+        AutoCompleteResponseList cityResponseList = new AutoCompleteResponseList();
         cityResponseList.setData(generateDataWithCityAndRestaurant());
         return cityResponseList;
     }
 
-    private List<CityResponse> generateDataWithCityAndRestaurant() {
-        City warsaw = generateWarsaw();
-        CityResponse cityResponse = new CityResponse(GEOS, warsaw);
-        City restaurant = generateRestaurant();
-        CityResponse restaurantResponse = new CityResponse("restaurant", restaurant);
+    private List<AutoCompleteResponse> generateDataWithCityAndRestaurant() {
+        AutoComplete warsaw = generateWarsaw();
+        AutoCompleteResponse cityResponse = new AutoCompleteResponse(GEOS, warsaw);
+        AutoComplete restaurant = generateRestaurant();
+        AutoCompleteResponse restaurantResponse = new AutoCompleteResponse("restaurant", restaurant);
         return List.of(cityResponse, restaurantResponse);
     }
 
-    private List<CityResponse> generateData() {
-        City warsaw = generateWarsaw();
-        CityResponse cityResponse = new CityResponse(GEOS, warsaw);
+    private List<AutoCompleteResponse> generateData() {
+        AutoComplete warsaw = generateWarsaw();
+        AutoCompleteResponse cityResponse = new AutoCompleteResponse(GEOS, warsaw);
         return List.of(cityResponse);
     }
 
-    private City generateWarsaw() {
-        City city = new City();
-        city.setName("Warsaw");
-        city.setTimezone("Europe/Warsaw");
-        city.setLocation("Warsaw, Poland");
-        city.setLocationId("274856");
-        city.setLatitude("52.229263");
-        city.setLongitude("21.01181");
-        return city;
+    private AutoComplete generateWarsaw() {
+        AutoComplete autoComplete = new AutoComplete();
+        autoComplete.setName("Warsaw");
+        autoComplete.setTimezone("Europe/Warsaw");
+        autoComplete.setLocation("Warsaw, Poland");
+        autoComplete.setLocationId("274856");
+        autoComplete.setLatitude("52.229263");
+        autoComplete.setLongitude("21.01181");
+        return autoComplete;
     }
 
-    private City generateRestaurant() {
-        City restaurant = new City();
+    private AutoComplete generateRestaurant() {
+        AutoComplete restaurant = new AutoComplete();
         restaurant.setName("restaurant");
         restaurant.setTimezone("Europe/Warsaw");
         restaurant.setLocation("Warsaw, Poland");

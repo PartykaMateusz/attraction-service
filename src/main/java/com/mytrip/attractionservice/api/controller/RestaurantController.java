@@ -16,7 +16,20 @@ public class RestaurantController {
     @Autowired
     private RestaurantService restaurantService;
 
-    @GetMapping("")
+
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<?> getRestaurantById(@PathVariable String restaurantId) {
+        Location restaurants = this.restaurantService.getRestaurantById(restaurantId);
+        return ResponseEntity.ok(restaurants);
+    }
+
+    @GetMapping("/name/{restaurantName}")
+    public ResponseEntity<?> getRestaurantByName(@PathVariable String restaurantName) {
+        List<Location> restaurants = this.restaurantService.getRestaurantByName(restaurantName);
+        return ResponseEntity.ok(restaurants);
+    }
+
+    @GetMapping("/city")
     public ResponseEntity<?> getRestaurantsInCity(@RequestParam(name="latitude") String latitude,
                                                   @RequestParam(name="longitude") String longitude) {
         List<Location> restaurants = this.restaurantService.getRestaurantsByCoordinates(latitude, longitude);

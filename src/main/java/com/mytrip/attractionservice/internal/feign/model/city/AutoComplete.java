@@ -14,7 +14,7 @@ import java.util.Map;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class City {
+public class AutoComplete {
 
     @JsonProperty("location_id")
     private String locationId;

@@ -1,6 +1,6 @@
 package com.mytrip.attractionservice.internal.feign;
 
-import com.mytrip.attractionservice.internal.feign.model.city.CityResponseList;
+import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +18,6 @@ public interface CityFeignClient {
     @RequestMapping(value = "/locations/auto-complete",
             produces = APPLICATION_JSON,
             method = RequestMethod.GET)
-    Optional<CityResponseList> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
-                                                 @RequestParam(name = "query") String query);
+    Optional<AutoCompleteResponseList> getLocationByName(@RequestHeader(name = "x-rapidapi-key") String rapidApiKey,
+                                                         @RequestParam(name = "query") String query);
 }
