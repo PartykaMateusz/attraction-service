@@ -18,10 +18,16 @@ public class CityController {
     @Autowired
     private CityService cityService;
 
-    @GetMapping("{cityName}")
+    @GetMapping("/name/{cityName}")
     public ResponseEntity<?> searchCityByName(@PathVariable(name = "cityName")
                                                   @Min(value = 3, message = "require 3 or more characters") final String cityName){
         List<Location> cities = cityService.getCityByName(cityName);
         return new ResponseEntity<>(cities, HttpStatus.OK);
+    }
+
+    @GetMapping("/{cityId}")
+    public ResponseEntity<?> searchCityById(@PathVariable(name = "cityId") final String cityId){
+        Location city = cityService.getCityById(cityId);
+        return new ResponseEntity<>(city, HttpStatus.OK);
     }
 }
