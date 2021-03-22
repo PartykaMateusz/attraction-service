@@ -2,11 +2,14 @@ package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
+import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
+import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.AutoComplete;
 import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponse;
 import com.mytrip.attractionservice.internal.feign.model.city.AutoCompleteResponseList;
 import com.mytrip.attractionservice.internal.model.Location;
+import com.mytrip.attractionservice.internal.model.LocationType;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +23,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,19 +35,36 @@ public class CityServiceImplTest {
     private static final String CITY_NAME = "Warsaw";
     private static final String GEOS = "geos";
     private static final String KEY = "testKey" ;
+    private static final String CITY_ID = "274856";
+    private static final String LATITUDE = "50";
+    private static final String LONGITUDE = "20";
 
     @InjectMocks
     private CityServiceImpl cityService;
 
     @Mock
-    CityFeignClient cityFeignClient;
+    private CityFeignClient cityFeignClient;
+
+    @Mock
+    private AttractionFeignClient attractionClient;
 
     @Mock
     private Function<AutoComplete, Location> cityMapper;
 
+    @Mock
+    private Function<AttractionResponse, Location> attractionMapper;
+
+    private AttractionResponse attractionResponse = this.generateAttractionResponse();
+
+    private Location cityLocation = this.generateLocation();
+
+
+
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(this.cityService, "KEY", KEY);
+        when(this.attractionClient.getAttractionsByAttractionId(KEY, CITY_ID)).thenReturn(Optional.of(attractionResponse));
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.cityLocation);
     }
 
     @Test
@@ -90,6 +111,13 @@ public class CityServiceImplTest {
         assertThrows(CityException.class, () -> cityService.getCityByName(CITY_NAME));
     }
 
+    @Test
+    public void getCityById(){
+        Location location = cityService.getCityById(CITY_ID);
+        assertNotNull(location);
+        verify(attractionMapper).apply(any());
+    }
+
     private AutoCompleteResponseList generateCityResponseList() {
         AutoCompleteResponseList cityResponseList = new AutoCompleteResponseList();
         cityResponseList.setData(generateData());
@@ -121,7 +149,7 @@ public class CityServiceImplTest {
         autoComplete.setName("Warsaw");
         autoComplete.setTimezone("Europe/Warsaw");
         autoComplete.setLocation("Warsaw, Poland");
-        autoComplete.setLocationId("274856");
+        autoComplete.setLocationId(CITY_ID);
         autoComplete.setLatitude("52.229263");
         autoComplete.setLongitude("21.01181");
         return autoComplete;
@@ -132,7 +160,7 @@ public class CityServiceImplTest {
         restaurant.setName("restaurant");
         restaurant.setTimezone("Europe/Warsaw");
         restaurant.setLocation("Warsaw, Poland");
-        restaurant.setLocationId("274856");
+        restaurant.setLocationId(CITY_ID);
         restaurant.setLatitude("52.229263");
         restaurant.setLongitude("21.01181");
         return restaurant;
@@ -141,5 +169,26 @@ public class CityServiceImplTest {
     private Request generateRequest() {
         Request request = Request.create(Request.HttpMethod.GET, "test", new HashMap<>(), (byte[]) null, null);
         return request;
+    }
+
+    private AttractionResponse generateAttractionResponse() {
+        AttractionResponse attraction = new AttractionResponse();
+        attraction.setLocationId(CITY_ID);
+        attraction.setName(CITY_NAME);
+        attraction.setLatitude("52.229263");
+        attraction.setLongitude("21.01181");
+        return attraction;
+    }
+
+    private Location generateLocation() {
+        Location city = new Location();
+        city.setName("Warsaw");
+        city.setTimezone("Europe/Warsaw");
+        city.setLocation("Warsaw, Poland");
+        city.setLocationId("274856");
+        city.setLatitude(LATITUDE);
+        city.setLongitude(LONGITUDE);
+        city.setLocationType(LocationType.CITY);
+        return city;
     }
 }
