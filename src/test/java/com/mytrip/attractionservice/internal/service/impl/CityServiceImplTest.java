@@ -2,6 +2,7 @@ package com.mytrip.attractionservice.internal.service.impl;
 
 import com.mytrip.attractionservice.api.exception.city.CityException;
 import com.mytrip.attractionservice.api.exception.city.CityNotFound;
+import com.mytrip.attractionservice.api.exception.restaurants.RestaurantsNotFound;
 import com.mytrip.attractionservice.internal.feign.AttractionFeignClient;
 import com.mytrip.attractionservice.internal.feign.CityFeignClient;
 import com.mytrip.attractionservice.internal.feign.model.attraction.AttractionResponse;
@@ -12,6 +13,7 @@ import com.mytrip.attractionservice.internal.model.Location;
 import com.mytrip.attractionservice.internal.model.LocationType;
 import feign.FeignException;
 import feign.Request;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -94,7 +96,7 @@ public class CityServiceImplTest {
     }
 
     @Test
-    public void getAttractionsByCityIdWhenFeignException(){
+    public void getCityByNameWhenFeignException(){
         Request request = generateRequest();
         FeignException feignException = new FeignException.NotFound("test", request, null);
         when(cityFeignClient.getLocationByName(anyString(), anyString())).thenThrow(feignException);
@@ -116,6 +118,41 @@ public class CityServiceImplTest {
         Location location = cityService.getCityById(CITY_ID);
         assertNotNull(location);
         verify(attractionMapper).apply(any());
+    }
+
+    @Test
+    public void getCityByIdWhenLocationIdIsNull(){
+        AttractionResponse attractionResponse = this.generateAttractionResponse();
+        attractionResponse.setLocationId(null);
+        when(this.attractionClient.getAttractionsByAttractionId(KEY, CITY_ID)).thenReturn(Optional.of(attractionResponse));
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.cityLocation);
+        assertThrows(CityNotFound.class, () -> cityService.getCityById(CITY_ID));
+    }
+
+    @Test
+    public void getCityByIdWhenLocationIsFoundButTypeIsWrong(){
+        cityLocation.setLocationType(LocationType.RESTAURANT);
+        when(this.attractionClient.getAttractionsByAttractionId(KEY, CITY_ID)).thenReturn(Optional.of(attractionResponse));
+        when(this.attractionMapper.apply(attractionResponse)).thenReturn(this.cityLocation);
+        assertThrows(CityNotFound.class, () -> cityService.getCityById(CITY_ID));
+    }
+
+    @Test
+    public void getCityByIdWhenFeignException(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.NotFound("test", request, null);
+        when(attractionClient.getAttractionsByAttractionId(KEY, CITY_ID)).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
+        assertThrows(CityNotFound.class, () -> cityService.getCityById(CITY_ID));
+    }
+
+    @Test
+    public void getCityByIdWhen500ErrorResponse(){
+        Request request = generateRequest();
+        FeignException feignException = new FeignException.BadGateway("test", request, null);
+        when(attractionClient.getAttractionsByAttractionId(KEY, CITY_ID)).thenThrow(feignException);
+        verify(attractionMapper, never()).apply(any());
+        assertThrows(CityException.class, () -> cityService.getCityById(CITY_ID));
     }
 
     private AutoCompleteResponseList generateCityResponseList() {
