@@ -16,6 +16,7 @@ public class AttractionMapper implements Function<AttractionResponse, Location> 
     private static final String COUNTRY = "country";
     private static final String PROVINCE = "province";
     private static final String REGION = "region";
+    private static final String GEOGRAPHIC = "geographic";
 
     @Override
     public Location apply(final AttractionResponse attractionResponse) {
@@ -39,6 +40,10 @@ public class AttractionMapper implements Function<AttractionResponse, Location> 
 
         if(category.size() == 2) {
             final Collection<String> value = category.values();
+            String next = value.iterator().next();
+            if (next.equalsIgnoreCase(GEOGRAPHIC)){
+                return LocationType.CITY;
+            }
             return LocationType.valueOf(value.iterator().next().toUpperCase());
         }
 

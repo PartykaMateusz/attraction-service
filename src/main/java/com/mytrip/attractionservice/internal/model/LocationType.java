@@ -5,9 +5,10 @@ public enum LocationType {
     CITY("city"),
     ATTRACTION("attraction"),
     ROLLUP("rollup"),
-    GEOGRAPHIC("geographic"),
     RESTAURANT("restaurant"),
+    HOTEL("hotel"),
     MORE_THAN_ONE_CATEGORY_ERROR("more_than_one_category_error");
+
 
     private String value;
 
