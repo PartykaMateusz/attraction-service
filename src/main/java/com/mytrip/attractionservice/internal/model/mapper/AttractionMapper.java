@@ -38,6 +38,9 @@ public class AttractionMapper implements Function<AttractionResponse, Location> 
 
     private LocationType getLocationType(final Map<String, String> category) {
 
+        if(category.size() < 2) {
+            return null;
+        }
         if(category.size() == 2) {
             final Collection<String> value = category.values();
             String next = value.iterator().next();
