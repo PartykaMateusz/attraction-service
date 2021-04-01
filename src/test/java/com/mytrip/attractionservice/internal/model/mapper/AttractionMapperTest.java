@@ -11,10 +11,7 @@ import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +32,7 @@ public class AttractionMapperTest {
 
     @Test
     public void apply_validData_withoutCategory(){
+        attractionResponse.setCategory(Collections.EMPTY_MAP);
         Location actualLocation = attractionMapper.apply(attractionResponse);
 
         assertNotNull(actualLocation);
@@ -51,6 +49,34 @@ public class AttractionMapperTest {
         assertEquals(attractionResponse.getAddress(), actualLocation.getAddress());
         assertEquals(WARSAW, actualLocation.getCity());
         assertEquals(POLAND, actualLocation.getCountry());
+    }
+
+    @Test
+    public void apply_validData_CategoryIsCity(){
+        attractionResponse.setCategory(this.generateCategoryGeographic());
+        Location actualLocation = attractionMapper.apply(attractionResponse);
+
+        assertNotNull(actualLocation);
+
+        assertEquals(attractionResponse.getLocationId(), actualLocation.getLocationId());
+        assertNotNull(actualLocation.getLocationType());
+        assertEquals(attractionResponse.getLocation(), actualLocation.getLocation());
+        assertEquals(attractionResponse.getName(), actualLocation.getName());
+        assertEquals(attractionResponse.getLatitude(), actualLocation.getLatitude());
+        assertEquals(attractionResponse.getLongitude(), actualLocation.getLongitude());
+        assertEquals(attractionResponse.getWebsite(), actualLocation.getWebsite());
+        assertEquals(attractionResponse.getTimezone(), actualLocation.getTimezone());
+        assertEquals(attractionResponse.getPhone(), actualLocation.getPhone());
+        assertEquals(attractionResponse.getAddress(), actualLocation.getAddress());
+        assertEquals(WARSAW, actualLocation.getCity());
+        assertEquals(POLAND, actualLocation.getCountry());
+    }
+
+    private Map<String, String> generateCategoryGeographic() {
+        Map<String, String> category = new HashMap<>();
+        category.put("key", "geographic");
+        category.put("name", "Geographic");
+        return category;
     }
 
     private AttractionResponse generateAttractionResponse() {
