@@ -36,6 +36,8 @@ dependencies {
 	}
 	implementation 'org.springdoc:springdoc-openapi-ui:1.4.4'
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
+
 	//implementation group: 'org.springframework.cloud', name: 'spring-cloud-config-client', version: '3.0.2'
 }
 
